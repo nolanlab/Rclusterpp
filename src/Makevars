@@ -9,8 +9,8 @@ USERDIR =	../inst/lib
 USERLIB	=	libRclusterpp$(DYLIB_EXT)
 USERLIBST =	libRclusterpp.a
 
-PKG_CPPFLAGS += -I../inst/include/
-PKG_LIBS += `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"`
+PKG_CPPFLAGS += -I../inst/include/ $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS += `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(SHLIB_OPENMP_CXXFLAGS)
 
 
 userLibrary: 	$(USERLIB) $(USERLIBST)
