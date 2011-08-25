@@ -1,0 +1,1 @@
+rm -rf src-i386 src-x86_64 src/*.o src/*.so src/*.a src/*.d src/*.dll src*/*.rc inst/lib

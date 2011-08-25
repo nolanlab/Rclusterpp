@@ -1,0 +1,13 @@
+Package: Rclusterpp
+Type: Package
+Title: Linkable C++ clustering 
+Version: 0.0.1
+Date: 2011-08-24
+Author: Michael Linderman 
+Maintainer: Michael Linderman <michael.d.linderman@gmail.com> 
+Description: Provide flexible native clustering routines that can be linked against in downstream packages. 
+License: MIT License
+LazyLoad: yes
+Depends: Rcpp (>= 0.9.6)
+LinkingTo: Rcpp
+Packaged: 2011-08-25 01:17:08 UTC; mlinderm
