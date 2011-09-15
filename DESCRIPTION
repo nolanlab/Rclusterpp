@@ -8,6 +8,7 @@ Maintainer: Michael Linderman <michael.d.linderman@gmail.com>
 Description: Provide flexible native clustering routines that can be linked against in downstream packages. 
 License: MIT License
 LazyLoad: yes
-Depends: Rcpp (>= 0.9.6)
+Depends: R (>= 2.12.0), Rcpp (>= 0.9.6)
+Suggests: RUnit
 LinkingTo: Rcpp
 Packaged: 2011-08-25 01:17:08 UTC; mlinderm

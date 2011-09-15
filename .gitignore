@@ -6,3 +6,5 @@ src/Makevars
 config.log
 config.status
 *.so
+*.o
+inst/unit_tests/report*

@@ -5,15 +5,21 @@
 
 namespace Rclusterpp {
 
-	typedef enum {
+	enum LinkageKinds {
 		WARD
-	} LinkageKinds;
+	};
 
-	typedef enum {
+	enum DistanceKinds {
 		EUCLIDEAN
-	} DistanceKinds;
+	};
 
 }
+
+/*
+ * These functions map indices provided by R-bindings to linkage and distance
+ * methods. The relationship between the index and the method needs to be kept'
+ * in sync with the R-bindings.
+ */
 
 namespace Rcpp {
 	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible) {
@@ -31,5 +37,10 @@ namespace Rcpp {
 }
 
 #include <Rcpp.h>
+
+#include <Rclusterpp/cluster.h>
+#include <Rclusterpp/algorithm.h>
+#include <Rclusterpp/method.h>
+#include <Rclusterpp/hclust.h>
 
 #endif

@@ -1,20 +1,46 @@
-#include <Rclusterpp.h>
+#include <cassert>
 #include <iostream>
 
-RcppExport SEXP hclust_from_data(SEXP data, SEXP nr, SEXP nc, SEXP link, SEXP dist) {
+#include <Rclusterpp.h>
+
+namespace Rclusterpp {
+
+	template<class ForwardIterator>
+	void clusters2hclust(ForwardIterator first, ForwardIterator last, Rcpp::IntegerMatrix& merge, Rcpp::NumericVector& height) {
+		std::transform(first, last, merge.column(0).begin(), std::mem_fun(&Traits::Iterator<ForwardIterator>::cluster_type::parent1Id));
+		std::transform(first, last, merge.column(1).begin(), std::mem_fun(&Traits::Iterator<ForwardIterator>::cluster_type::parent2Id));
+		std::transform(first, last, height.begin(), std::mem_fun(&Traits::Iterator<ForwardIterator>::cluster_type::disimilarity));
+	}
+
+} // end of Rclusterpp namespace
+
+
+RcppExport SEXP hclust_from_data(SEXP data, SEXP link, SEXP dist) {
 BEGIN_RCPP
 	using namespace Rcpp;
 	using namespace Rclusterpp;
 
-	// Reconstitute matrix (forced to 'double' vector in wrapping function)
-	NumericMatrix data_m(as<int>(nr), as<int>(nc), as<NumericVector>(data).begin());
+	NumericMatrix data_m(data);
 		
-	std::cerr << "Matrix size: " << data_m.nrow() << "x" << data_m.ncol() << std::endl;
+	IntegerMatrix merge(data_m.nrow()-1, 2);
+	NumericVector height(data_m.nrow()-1);
 
 	LinkageKinds  lk = as<LinkageKinds>(link);
 	DistanceKinds dk = as<DistanceKinds>(dist);
 
-
-  return NumericVector::create(0.0);
+	switch (lk) {
+		default:
+			assert(false && "Linkage kind not yet supported");
+		case Rclusterpp::WARD: {
+		
+			NumericCluster::center_vector clusters(data_m.nrow());
+			
+			rows2clusters(clusters, data_m);
+			hclust_rnn_chain(make_wards_method<NumericCluster::center>(), clusters);
+			clusters2hclust(clusters.begin()+data_m.nrow(), clusters.end(), merge, height);
+		}
+	}
+	
+  return List::create( _["merge"] = merge, _["height"] = height ); 
 END_RCPP
 }

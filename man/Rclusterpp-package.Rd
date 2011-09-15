@@ -3,37 +3,27 @@
 \alias{Rclusterpp}
 \docType{package}
 \title{
-What the package does (short line)
+Linkable C++ clustering
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+Rclusterpp provides flexible native clustering routines optimized for
+performance and minimal memory requirements. Like Rcpp, Rclusterpp is designed
+to be linked against by downstream packages.
 }
 \details{
-\tabular{ll}{
-Package: \tab Rclusterpp\cr
-Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2011-08-24\cr
-License: \tab What license is it under?\cr
-LazyLoad: \tab yes\cr
-}
-~~ An overview of how to use the package, including the most important ~~
-~~ functions ~~
+Rclusterpp provides replacements for hierarchical clustering functions, e.g.
+hclust, as a linkable library for building native implementations of custom
+clustering algorithms.  
 }
 \author{
-Who wrote it
+Michael D. Linderman, Robert Bruggner
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Maintainer: Michael D. Linderman <michael.d.linderman@gmail.com>
 }
 \references{
-~~ Literature or other references for background information ~~
+Murtagh, F. (1983), "A survey of recent advances in hierarchical clustering algorithms", Computer Journal, 26, 354-359.
 }
 \keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
-}
-\examples{
-%% ~~ simple examples of the most important functions ~~
+\code{\link[Rcpp:Rcpp-package]{Rcpp}}
 }

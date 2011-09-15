@@ -16,16 +16,26 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
 		if (method == -1)
 			stop("Ambiguous distance metric")
 
-		d <- dist(x, method=DISTANCES[distance], p=p)
+		if (METHODS[method] == "ward" && DISTANCES[distance] != "euclidean") {
+			warning("Distance method is forced to (squared) 'euclidean' distance for Ward's method")
+			distance <- which(DISTANCES == "euclidean")[1]
+		}
 	
 		N <- nrow(x <- as.matrix(x))
 		hcl <- .Call("hclust_from_data", 
-		             data = as.double(x), nr = as.integer(N), nc = as.integer(ncol(x)),
+		             data = x,
 								 link = as.integer(method), 
 								 dist = as.integer(distance),
 								 DUP = FALSE, NAOK = TRUE, PACKAGE = "Rclusterpp" )
-
-		return(hclust(d, method=METHODS[method], members))
+		
+		hcl$labels = row.names(x)
+		hcl$order  = 1L:(nrow(x)-1)  # TODO: Generate a meaningful order ...
+		hcl$method = METHODS[method]
+		hcl$call   = match.call()
+		hcl$dist.method = DISTANCES[distance]
+		class(hcl) <- "hclust"
+		
+		return(hcl)
 	}
 }
 
