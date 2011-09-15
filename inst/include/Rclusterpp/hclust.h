@@ -3,9 +3,8 @@
 
 namespace Rclusterpp {
 
-template<class ForwardIterator>
-void clusterpp2hclust(ForwardIterator first, ForwardIterator last, Rcpp::IntegerMatrix& merge, Rcpp::NumericVector& height);
-
+	template<class ForwardIterator>
+	void clusterpp2hclust(ForwardIterator first, ForwardIterator last, Rcpp::IntegerMatrix& merge, Rcpp::NumericVector& height);
 
 } // end of Rclusterpp namespace
 

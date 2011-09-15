@@ -1,6 +1,9 @@
 #ifndef RCLUSTERPP_CLUSTER_H
 #define RCLUSTERPP_CLUSTER_H
 
+#include <limits>
+#include <vector>
+
 namespace Rclusterpp {
 	
 	template<typename Derived>
@@ -134,6 +137,11 @@ namespace Rclusterpp {
 		}
 	}
 
+	template<class ForwardIterator>
+	void destroy_clusters(ForwardIterator first, ForwardIterator last) {
+		for (; first != last; ++first)
+			delete *first;
+	}
 }
 
 #endif

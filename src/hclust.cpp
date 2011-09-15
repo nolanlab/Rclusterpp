@@ -38,6 +38,7 @@ BEGIN_RCPP
 			rows2clusters(clusters, data_m);
 			hclust_rnn_chain(make_wards_method<NumericCluster::center>(), clusters);
 			clusters2hclust(clusters.begin()+data_m.nrow(), clusters.end(), merge, height);
+			destroy_clusters(clusters.begin(), clusters.end());
 		}
 	}
 	

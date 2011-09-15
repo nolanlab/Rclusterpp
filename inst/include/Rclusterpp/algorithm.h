@@ -3,7 +3,7 @@
 
 #include <limits>
 #include <utility>
-#include <cassert>
+#include <vector>
 
 #include <Rclusterpp/cluster.h>
 
@@ -122,7 +122,6 @@ namespace Rclusterpp {
 
 		for (size_t i=initial_clusters; i<result_clusters; i++) {
 			clusters[i]->set_id(i - initial_clusters + 1);  // Use R hclust 1-indexed convention for Id's
-			//std::cerr << clusters[i]->parent1()->id() << " " << clusters[i]->parent2()->id() << " " << clusters[i]->id() << " " << clusters[i]->disimilarity() << std::endl;
 		}
 
 	}

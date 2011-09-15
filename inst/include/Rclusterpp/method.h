@@ -1,8 +1,6 @@
 #ifndef RCLUSTERP_METHOD_H
 #define RCLUSTERP_METHOD_H
 
-#include <cassert>
-
 #include <Rclusterpp/cluster.h>
 
 namespace Rclusterpp {
