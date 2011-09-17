@@ -24,13 +24,13 @@ namespace Rclusterpp {
 namespace Rcpp {
 	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible) {
 		switch (as<int>(x)) {
-			default: throw not_compatible("Expecting integer index into linkages"); 
+			default: throw not_compatible("Linkage method invalid or not yet supported"); 
 			case 1: return Rclusterpp::WARD;
 		}
 	}
 	template <> Rclusterpp::DistanceKinds as(SEXP x) throw(not_compatible) {
 		switch (as<int>(x)) {
-			default: throw not_compatible("Expecting integer index into distances"); 
+			default: throw not_compatible("Distance method invalid or not yet supported"); 
 			case 1: return Rclusterpp::EUCLIDEAN;
 		}
 	}

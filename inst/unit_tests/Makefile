@@ -6,7 +6,9 @@ R=R
 all: inst test
 
 install: # Install package
-	cd ${TOP}/..;\
+	cd ${TOP};\
+	./cleanup;\
+	cd ..;\
 	${R} CMD INSTALL ${PKG}
 
 test: # Run unit tests

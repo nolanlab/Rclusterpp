@@ -29,7 +29,6 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
 								 DUP = FALSE, NAOK = TRUE, PACKAGE = "Rclusterpp" )
 		
 		hcl$labels = row.names(x)
-		hcl$order  = 1L:(nrow(x)-1)  # TODO: Generate a meaningful order ...
 		hcl$method = METHODS[method]
 		hcl$call   = match.call()
 		hcl$dist.method = DISTANCES[distance]

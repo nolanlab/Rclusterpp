@@ -35,9 +35,7 @@ namespace Rclusterpp {
 			ssize_t parent1Id() const { return (parent1_) ? parent1_->id() : NULLID(); }
 			ssize_t parent2Id() const { return (parent2_) ? parent2_->id() : NULLID(); }
 
-
 			distance_type disimilarity() const { return disimilarity_; }
-
 	
 		private:
 			
@@ -50,14 +48,7 @@ namespace Rclusterpp {
 			double disimilarity_;
 
 		public:
-
-			struct IdPredicate : std::binary_function<Derived const *, Derived const *, bool> {
-				bool operator()(Derived const * lhs, Derived const * rhs) const {
-					return lhs->id() < rhs->id();
-				}
-			};
-			static IdPredicate id_predicate() { return IdPredicate(); }
-
+	
 			struct DisimilarityPredicate : std::binary_function<Derived const *, Derived const *, bool> {
 				bool operator()(Derived const * lhs, Derived const * rhs) const {
 					return lhs->disimilarity() < rhs->disimilarity();
@@ -65,6 +56,16 @@ namespace Rclusterpp {
 			};
 			static DisimilarityPredicate disimilarity_predicate() { return DisimilarityPredicate(); }
 	};
+
+	template<class Cluster>
+	inline bool compare_id(Cluster const* l, Cluster const* r) {
+		return l->id() < r->id();
+	}
+
+	template<class Cluster>
+	inline bool compare_disimilarity(Cluster const* l, Cluster const* r) {
+		return l->disimilarity() < r->disimilarity();
+	}
 
 	template<typename T>
 	class ClusterWithCenter : public Cluster<ClusterWithCenter<T> > {
@@ -98,50 +99,33 @@ namespace Rclusterpp {
 			center_type center;
 	};
 
-	namespace Util {
-	
-		template<typename T>
-		struct Dereference {
-			typedef T value_type;
-		};
-
-		template<typename T>
-		struct Dereference<T*> {
-			typedef T value_type;
-		};
-
-	} // end of Util namespace 
-
 	namespace Traits {
 		
-		template<typename Data>
+		template<class T>
 		struct Cluster {
-			typedef ClusterWithCenter<Data> center;
-			typedef std::vector<center*>    center_vector;
+			typedef ClusterWithCenter<T> center;
+			typedef std::vector<center*> center_vector;
 		};
 
-		template<typename Iter>
-		struct Iterator {
-			typedef typename Util::Dereference<typename Iter::value_type>::value_type cluster_type;
+		template<typename T>
+		struct Collection {
+			
+			template<typename P>
+			struct Dereference {
+				typedef P value_type;
+			};
+
+			template<typename P>
+			struct Dereference<P*> {
+				typedef P value_type;
+			};
+
+			typedef typename Dereference<typename T::value_type>::value_type cluster_type;
 		};
 	
 	} // end of Traits namespace
 
 
-	typedef Traits::Cluster<Rcpp::NumericMatrix::stored_type> NumericCluster;	
-
-	void rows2clusters(NumericCluster::center_vector& clusters, Rcpp::NumericMatrix& matrix) {
-		clusters.resize(matrix.nrow());
-		for (ssize_t i=0; i<matrix.nrow(); i++) {
-			clusters[i] = new NumericCluster::center(-(i+1), matrix.row(i));
-		}
-	}
-
-	template<class ForwardIterator>
-	void destroy_clusters(ForwardIterator first, ForwardIterator last) {
-		for (; first != last; ++first)
-			delete *first;
-	}
-}
+} // end of Rcluserpp namespace
 
 #endif
