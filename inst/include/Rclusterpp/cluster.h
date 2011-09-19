@@ -67,49 +67,51 @@ namespace Rclusterpp {
 		return l->disimilarity() < r->disimilarity();
 	}
 
-	template<typename T>
-	class ClusterWithCenter : public Cluster<ClusterWithCenter<T> > {
+	template<int RTYPE>
+	class ClusterWithCenter : public Cluster<ClusterWithCenter<RTYPE> > {
 		private:
-			typedef Cluster<ClusterWithCenter<T> > base_type;
+			typedef Cluster<ClusterWithCenter<RTYPE> > base_class;
 		
 		public:
 			
-			typedef T data_type;
-			typedef typename base_type::distance_type distance_type;
-			typedef std::vector<data_type> center_type;
+			typedef typename base_class::distance_type distance_type;
+			typedef Rcpp::Vector<RTYPE>               center_type;
 			
-			typedef typename center_type::const_iterator const_center_iterator;
-			typedef typename center_type::iterator center_iterator;
-
 		public:	
+			
 			ClusterWithCenter(ClusterWithCenter const * parent1, ClusterWithCenter const * parent2, distance_type disimilarity) : 
-				base_type(parent1, parent2, disimilarity), center(parent1->dim()) {} 
+				base_class(parent1, parent2, disimilarity), center_(parent1->dim()) {} 
 
-			template<int RTYPE>
-			ClusterWithCenter(ssize_t id, Rcpp::MatrixRow<RTYPE> row) : base_type(id), center(row.begin(), row.end()) {}
+			ClusterWithCenter(ssize_t id, const Rcpp::MatrixRow<RTYPE>& row) : base_class(id), center_(row) {}
 			
-			size_t dim() const { return center.size(); }
-					
-			const_center_iterator center_begin() const { return center.begin(); }
-			center_iterator center_begin() { return center.begin(); }
+			size_t dim() const { return center_.size(); }
+			typename center_type::stored_type size() const { return (typename center_type::stored_type)this->base_class::size(); }
 
+			const center_type& center() const { return center_; }
 			
+			template<class T>
+			void set_center(const T& center) { center_ = center; }
+
 		private:
 			
-			center_type center;
+			center_type center_;
 	};
 
 	namespace Traits {
-		
-		template<class T>
+	
+		// NOTE: We can expand out this trait with template specialization
+		// to support initialization from other sources that NumericMatrix, etc.
+
+		template<int RTYPE>
 		struct Cluster {
-			typedef ClusterWithCenter<T> center;
-			typedef std::vector<center*> center_vector;
+			typedef ClusterWithCenter<RTYPE> center;
+			typedef std::vector<center*>     center_vector;
 		};
 
 		template<typename T>
 		struct Collection {
-			
+		
+			// Helper structs for dereferencing pointer types in collections
 			template<typename P>
 			struct Dereference {
 				typedef P value_type;

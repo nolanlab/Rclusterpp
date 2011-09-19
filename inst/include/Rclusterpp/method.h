@@ -35,11 +35,8 @@ namespace Rclusterpp {
 		struct WardsDistance : DistanceFunction<Cluster> {
 			typedef typename WardsDistance::result_type result_type;
 			result_type operator()(const Cluster& c1, const Cluster& c2) const {
-				result_type dist = 0.;
-				typename Cluster::const_center_iterator cen1 = c1.center_begin(), cen2 = c2.center_begin();
-				for (size_t i=0; i<c1.dim(); i++) {
-					dist += (cen1[i] - cen2[i]) * (cen1[i] - cen2[i]);
-				}
+				using namespace Rcpp;
+				result_type dist = sum( pow(c1.center() - c2.center(), 2) );	
 				return dist * (c1.size() * c2.size()) / (c1.size() + c2.size());
 			}
 		};
@@ -47,11 +44,9 @@ namespace Rclusterpp {
 		template<class Cluster>
 		struct WardsMerge {
 			void operator()(Cluster& co, const Cluster& c1, const Cluster& c2) {
-				typename Cluster::const_center_iterator cen1 = c1.center_begin(), cen2 = c2.center_begin();
-				typename Cluster::center_iterator       cenO = co.center_begin();
-				for (size_t i=0; i<co.dim(); i++) {
-					cenO[i] = (c1.size() * cen1[i] + c2.size() * cen2[i]) /  (co.size());
-				}
+				Rcpp::NumericVector merged_center = 
+					((c1.size() * c1.center()) + (c2.size() * c2.center())) / co.size();
+				co.set_center(merged_center);
 			}
 		};
 

@@ -3,7 +3,7 @@
 
 namespace Rclusterpp {
 
-	typedef Traits::Cluster<Rcpp::NumericMatrix::stored_type> NumericCluster;	
+	typedef Traits::Cluster<Rcpp::NumericMatrix::r_type::value> NumericCluster;	
 
 	// Initialization and destruction
 
