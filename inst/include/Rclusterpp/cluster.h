@@ -82,7 +82,7 @@ namespace Rclusterpp {
 			ClusterWithCenter(ClusterWithCenter const * parent1, ClusterWithCenter const * parent2, distance_type disimilarity) : 
 				base_class(parent1, parent2, disimilarity), center_(parent1->dim()) {} 
 
-			ClusterWithCenter(ssize_t id, const Rcpp::MatrixRow<RTYPE>& row) : base_class(id), center_(row) {}
+			ClusterWithCenter(ssize_t id, size_t obs_id, const Rcpp::MatrixRow<RTYPE>& row) : base_class(id), center_(row) {}
 			
 			size_t dim() const { return center_.size(); }
 			typename center_type::stored_type size() const { return (typename center_type::stored_type)this->base_class::size(); }
@@ -97,6 +97,92 @@ namespace Rclusterpp {
 			center_type center_;
 	};
 
+	template<int RTYPE>
+	class ClusterWithObs : public Cluster<ClusterWithObs<RTYPE> > {
+		private:
+			typedef Cluster<ClusterWithObs<RTYPE> > base_class;
+
+		public:
+			
+			typedef typename base_class::distance_type distance_type;
+			typedef typename std::vector<size_t>       idx_type;
+
+			typedef typename idx_type::iterator       idx_iterator;
+			typedef typename idx_type::const_iterator idx_const_iterator;
+
+		public:
+
+			ClusterWithObs(ClusterWithObs const * parent1, ClusterWithObs const * parent2, distance_type disimilarity) : 
+				base_class(parent1, parent2, disimilarity), idxs_(parent1->idxs()) {
+				
+				// Append "merged" observation idxs	
+				idxs_.insert(idxs_.end(), parent2->idxs_begin(), parent2->idxs_end());
+			} 
+
+			ClusterWithObs(ssize_t id, size_t obs_id, const Rcpp::MatrixRow<RTYPE>& row) : 
+				base_class(id), idxs_(1, obs_id) {}
+
+			const idx_type& idxs() const { return idxs_; }
+			idx_const_iterator idxs_begin() const { return idxs_.begin(); }
+			idx_const_iterator idxs_end() const { return idxs_.end(); }
+
+		private:
+
+			idx_type        idxs_;
+	};
+
+	template<class T>
+	class ClusterVector {
+		private:
+
+			typedef std::vector<T*> underlying_type;
+		
+		public:
+
+			typedef T cluster_type;
+			typedef typename underlying_type::value_type      value_type;
+			typedef typename underlying_type::reference       reference;
+			typedef typename underlying_type::const_reference const_reference;
+			typedef typename underlying_type::iterator        iterator;
+			typedef typename underlying_type::const_iterator  const_iterator;
+			typedef typename underlying_type::size_type       size_type;
+		
+			ClusterVector() : clusters_() {}
+			ClusterVector(size_t n) : clusters_(n) {}
+			
+			~ClusterVector() {
+				for (iterator i=begin(), e=end(); i!=e; ++i)
+					delete *i;
+			}
+
+			iterator begin() { return clusters_.begin(); }
+			iterator end() { return clusters_.end(); }
+
+			const_iterator begin() const { return clusters_.begin(); }
+			const_iterator end() const { return clusters_.end(); }
+
+			size_type size() const { return clusters_.size(); }
+			void reserve(size_type n) { clusters_.reserve(n); }
+			void clear() { clusters_.clear(); }
+			void resize(size_type n, value_type v = value_type()) { clusters_.resize(n, v); }
+
+			reference operator[](size_type n) { return clusters_[n]; }
+			const_reference operator[](size_type n) const { return clusters_[n]; }
+
+			reference back() { return clusters_.back(); }
+			void push_back(const value_type& v) { clusters_.push_back(v); }
+
+		private:
+
+			ClusterVector(const ClusterVector& v) {}
+
+			underlying_type clusters_;
+
+	};
+
+
+
+
 	namespace Traits {
 	
 		// NOTE: We can expand out this trait with template specialization
@@ -105,29 +191,13 @@ namespace Rclusterpp {
 		template<int RTYPE>
 		struct Cluster {
 			typedef ClusterWithCenter<RTYPE> center;
-			typedef std::vector<center*>     center_vector;
-		};
-
-		template<typename T>
-		struct Collection {
-		
-			// Helper structs for dereferencing pointer types in collections
-			template<typename P>
-			struct Dereference {
-				typedef P value_type;
-			};
-
-			template<typename P>
-			struct Dereference<P*> {
-				typedef P value_type;
-			};
-
-			typedef typename Dereference<typename T::value_type>::value_type cluster_type;
+			typedef ClusterWithObs<RTYPE>    obs;
 		};
 	
 	} // end of Traits namespace
 
 
 } // end of Rcluserpp namespace
+
 
 #endif

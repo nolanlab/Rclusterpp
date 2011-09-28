@@ -6,22 +6,13 @@ namespace Rclusterpp {
 	typedef Traits::Cluster<Rcpp::NumericMatrix::r_type::value> NumericCluster;	
 
 	// Initialization and destruction
-
-	void init_clusters_from_rows(Rcpp::NumericMatrix& matrix, NumericCluster::center_vector& clusters);
-
-	template<class Clusters>
-	void destroy_clusters(Clusters& clusters);
+	template<class Matrix, class Clusters>
+	void init_clusters_from_rows(const Matrix* matrix, Clusters& clusters);
 
 	// Translate clustering results to format expected by R...
 
-	template<class ClusterIterator>
-	void populate_Rhclust(
-		ClusterIterator first, 
-		ClusterIterator last, 
-		Rcpp::IntegerMatrix& merge, 
-		Rcpp::NumericVector& height,
-		Rcpp::IntegerVector& order
-	);
+	template<class Clusters>
+	void populate_Rhclust(const Clusters& clusters, Rcpp::IntegerMatrix* merge, Rcpp::NumericVector* height, Rcpp::IntegerVector* order);
 
 } // end of Rclusterpp namespace
 

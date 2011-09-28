@@ -1,4 +1,4 @@
-PKG_CPPFLAGS =	-I../inst/include/ $(SHLIB_OPENMP_CXXFLAGS)
+PKG_CPPFLAGS =	-Wall -I../inst/include/ $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "Rcpp:::LdFlags()") $(SHLIB_OPENMP_CFLAGS)
 
 ## we place it inside the inst/ directory so that it gets installed by the package

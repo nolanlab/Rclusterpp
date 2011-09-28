@@ -21,3 +21,9 @@ test.hclust.ward <- function()
 	compare.hclust(h, r)
 }
 
+test.hclust.average <- function()
+{
+	h <- hclust(dist(USArrests, method="euclidean"), method="average")
+	r <- Rclusterpp.hclust(USArrests, method="average", distance="euclidean")
+	compare.hclust(h, r)
+}

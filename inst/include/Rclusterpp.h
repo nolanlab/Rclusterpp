@@ -6,7 +6,8 @@
 namespace Rclusterpp {
 
 	enum LinkageKinds {
-		WARD
+		WARD,
+		AVERAGE
 	};
 
 	enum DistanceKinds {
@@ -26,6 +27,7 @@ namespace Rcpp {
 		switch (as<int>(x)) {
 			default: throw not_compatible("Linkage method invalid or not yet supported"); 
 			case 1: return Rclusterpp::WARD;
+			case 2: return Rclusterpp::AVERAGE;
 		}
 	}
 	template <> Rclusterpp::DistanceKinds as(SEXP x) throw(not_compatible) {

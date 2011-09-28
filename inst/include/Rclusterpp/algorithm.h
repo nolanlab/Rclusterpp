@@ -7,30 +7,11 @@
 #include <functional>
 #include <vector>
 
-#include <Rclusterpp/cluster.h>
+#include <Rclusterpp/util.h>
 
 namespace Rclusterpp {
 
-	namespace {
-			
-		template<class OP>
-		class binder1st_P : public std::unary_function<typename OP::second_argument_type*, typename OP::result_type> {
-		public:
-			binder1st_P(OP& o, typename OP::first_argument_type const* a1) : op(o), arg(a1) {}
-			typename OP::result_type operator()(const typename OP::second_argument_type* x) {
-				return op(*arg, *x);
-			}
-			
-		private:
-			OP& op;
-			typename OP::first_argument_type const* arg;
-		};
-
-		template<class OP>
-		inline binder1st_P<OP> bind1st_P(OP& o, typename OP::first_argument_type const* a) { return binder1st_P<OP>(o,a); } 
-		
-	} // end of anonymous namespace
-
+	
 	
 	template<class ForwardIterator, class Distancer>
 	std::pair<ForwardIterator, typename Distancer::result_type> nearest_neighbor(
@@ -59,9 +40,9 @@ namespace Rclusterpp {
 	template<class ClusteringMethod, class ClusterVector>
 	void cluster_via_rnn(ClusteringMethod method, ClusterVector& clusters) {
 
-		typedef ClusterVector                                            clusters_type;
-		typedef typename Traits::Collection<clusters_type>::cluster_type cluster_type;
-		typedef typename ClusteringMethod::distance_type                 distance_type;
+		typedef ClusterVector                            clusters_type;
+		typedef typename clusters_type::cluster_type     cluster_type;
+		typedef typename ClusteringMethod::distance_type distance_type;
 	
 		// Result from nearest neighbor scan
 		typedef std::pair<typename clusters_type::iterator, distance_type>  nearn_type;
@@ -94,7 +75,7 @@ namespace Rclusterpp {
 				nearn_type nn = nearest_neighbor(
 					next_unchained, 
 					clusters.end(), 
-					bind1st_P(method.distancer, cluster_at_tip(chain)), // Bind tip into distance function for computing nearest neighbor 
+					Util::bind1st_P(method.distancer, cluster_at_tip(chain)), // Bind tip into distance function for computing nearest neighbor 
 					distance_to_tip(chain)
 				);
 				
