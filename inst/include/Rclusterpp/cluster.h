@@ -41,7 +41,7 @@ namespace Rclusterpp {
 			
 			ssize_t id_;
 			size_t  size_;
-
+	
 			Derived const * parent1_;
 			Derived const * parent2_;
 
@@ -82,7 +82,7 @@ namespace Rclusterpp {
 			ClusterWithCenter(ClusterWithCenter const * parent1, ClusterWithCenter const * parent2, distance_type disimilarity) : 
 				base_class(parent1, parent2, disimilarity), center_(parent1->dim()) {} 
 
-			ClusterWithCenter(ssize_t id, size_t obs_id, const Rcpp::MatrixRow<RTYPE>& row) : base_class(id), center_(row) {}
+			ClusterWithCenter(ssize_t id, size_t obs_id, const center_type& vector) : base_class(id), center_(vector) {}
 			
 			size_t dim() const { return center_.size(); }
 			typename center_type::stored_type size() const { return (typename center_type::stored_type)this->base_class::size(); }
@@ -119,9 +119,9 @@ namespace Rclusterpp {
 				idxs_.insert(idxs_.end(), parent2->idxs_begin(), parent2->idxs_end());
 			} 
 
-			ClusterWithObs(ssize_t id, size_t obs_id, const Rcpp::MatrixRow<RTYPE>& row) : 
+			ClusterWithObs(ssize_t id, size_t obs_id, const Rcpp::Vector<RTYPE>& vector) : 
 				base_class(id), idxs_(1, obs_id) {}
-
+	
 			const idx_type& idxs() const { return idxs_; }
 			idx_const_iterator idxs_begin() const { return idxs_.begin(); }
 			idx_const_iterator idxs_end() const { return idxs_.end(); }
@@ -147,8 +147,7 @@ namespace Rclusterpp {
 			typedef typename underlying_type::const_iterator  const_iterator;
 			typedef typename underlying_type::size_type       size_type;
 		
-			ClusterVector() : clusters_() {}
-			ClusterVector(size_t n) : clusters_(n) {}
+			ClusterVector(size_t n) : initial_(n), clusters_(n) {}
 			
 			~ClusterVector() {
 				for (iterator i=begin(), e=end(); i!=e; ++i)
@@ -163,39 +162,38 @@ namespace Rclusterpp {
 
 			size_type size() const { return clusters_.size(); }
 			void reserve(size_type n) { clusters_.reserve(n); }
-			void clear() { clusters_.clear(); }
-			void resize(size_type n, value_type v = value_type()) { clusters_.resize(n, v); }
 
 			reference operator[](size_type n) { return clusters_[n]; }
 			const_reference operator[](size_type n) const { return clusters_[n]; }
-
-			reference back() { return clusters_.back(); }
 			void push_back(const value_type& v) { clusters_.push_back(v); }
+
+			size_t initial_clusters() const { return initial_; }
+
+			template<class Vector>
+			static cluster_type* make_cluster(ssize_t id, size_t obs_id, const Vector& vector) {
+				return new cluster_type(id, obs_id, vector);
+			}
 
 		private:
 
-			ClusterVector(const ClusterVector& v) {}
+			ClusterVector() : clusters_() {}
+			explicit ClusterVector(const ClusterVector& v);
 
+			size_t          initial_;  // Number of initial clusters
 			underlying_type clusters_;
 
 	};
 
-
-
-
-	namespace Traits {
 	
-		// NOTE: We can expand out this trait with template specialization
-		// to support initialization from other sources that NumericMatrix, etc.
+	// NOTE: We can expand out this trait with template specialization
+	// to support initialization from other sources than NumericMatrix, etc.
 
-		template<int RTYPE>
-		struct Cluster {
+	template<int RTYPE>
+		struct ClusterTypes {
 			typedef ClusterWithCenter<RTYPE> center;
 			typedef ClusterWithObs<RTYPE>    obs;
 		};
 	
-	} // end of Traits namespace
-
 
 } // end of Rcluserpp namespace
 

@@ -99,9 +99,7 @@ namespace Rclusterpp {
 				}
 			}
 		}
-
-		
-
+	
 		// Cleanup cluster listing
 		
 		// Re-order the clusters, with initial clusters in the beginning, ordered by id

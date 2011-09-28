@@ -39,9 +39,7 @@ namespace Rclusterpp {
 			public:
 				typedef typename DistanceFromStoredDataRows::result_type result_type;
 
-				DistanceFromStoredDataRows(Matrix* data) : data_(data) {
-					std::cerr << data_->nrow() << std::endl;
-				}	
+				DistanceFromStoredDataRows(Matrix* data) : data_(data) {}	
 
 				result_type operator()(size_t i1, size_t i2) {
 					return euclidean_distance(((Matrix*)data_)->row(i1), ((Matrix*)data_)->row(i2));
