@@ -9,6 +9,6 @@ Description: Provide flexible native clustering routines that can be linked agai
 License: MIT License
 LazyLoad: yes
 Depends: R (>= 2.12.0), Rcpp (>= 0.9.6)
-Suggests: RUnit
+Suggests: RUnit, rbenchmark, fastcluster
 LinkingTo: Rcpp
 Packaged: 2011-08-25 01:17:08 UTC; mlinderm
