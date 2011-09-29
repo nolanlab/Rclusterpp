@@ -7,35 +7,55 @@
 #include <functional>
 #include <vector>
 
+#include <Rclusterpp/cluster.h>
 #include <Rclusterpp/util.h>
 
 namespace Rclusterpp {
 
-	
-	
-	template<class ForwardIterator, class Distancer>
-	std::pair<ForwardIterator, typename Distancer::result_type> nearest_neighbor(
-		ForwardIterator first, 
-		ForwardIterator last, 
+	template<class RandomIterator, class Distancer>
+	std::pair<RandomIterator, typename Distancer::result_type> nearest_neighbor(
+		const RandomIterator& first, 
+		const RandomIterator& last, 
 		Distancer       distancer, 
 		typename Distancer::result_type max_dist=std::numeric_limits<typename Distancer::result_type>::max()
 	) {
 	
 		typedef typename Distancer::result_type Dist_t;
 
-		ForwardIterator min_i = last;
-		Dist_t          min_d = max_dist;
-		for (ForwardIterator i=first; i!=last; ++i) {
-			Dist_t dist = distancer(*i);
-			if (dist < min_d) {
-				min_i = i;
-				min_d = dist;
+		RandomIterator min_i = last;
+		Dist_t         min_d = max_dist;
+
+#ifdef _OPENMP
+		//#pragma omp parallel	
+#endif
+		{
+			RandomIterator min_i_l = last;
+			Dist_t         min_d_l = max_dist;
+
+#ifdef _OPENMP
+		//#pragma omp for nowait	
+#endif
+			for (ssize_t i=0; i<(last-first); i++) {
+				Dist_t dist = distancer(*(first+i));				
+				if (dist < min_d_l) {
+					min_i_l = first + i;
+					min_d_l = dist;
+				}
+			}
+
+#ifdef _OPENMP
+			//#pragma omp critical	
+#endif
+			{
+				if (min_d_l < min_d) {
+					min_i = min_i_l;
+					min_d = min_d_l;
+				}
 			}
 		}
-
 		return std::make_pair(min_i, min_d);	
 	}
-	
+
 
 	template<class ClusteringMethod, class ClusterVector>
 	void cluster_via_rnn(ClusteringMethod method, ClusterVector& clusters) {

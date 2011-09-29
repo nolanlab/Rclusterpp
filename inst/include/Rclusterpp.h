@@ -29,20 +29,8 @@ namespace Rcpp {
 	 * in sync with the R-bindings.
 	 */
 
-	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible) {
-		switch (as<int>(x)) {
-			default: throw not_compatible("Linkage method invalid or not yet supported"); 
-			case 1: return Rclusterpp::WARD;
-			case 2: return Rclusterpp::AVERAGE;
-		}
-	}
-	
-	template <> Rclusterpp::DistanceKinds as(SEXP x) throw(not_compatible) {
-		switch (as<int>(x)) {
-			default: throw not_compatible("Distance method invalid or not yet supported"); 
-			case 1: return Rclusterpp::EUCLIDEAN;
-		}
-	}
+	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible);	
+	template <> Rclusterpp::DistanceKinds as(SEXP x) throw(not_compatible);
 
 	template <> SEXP wrap( const Rclusterpp::Hclust& );
 

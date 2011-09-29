@@ -3,7 +3,7 @@
 
 namespace Rclusterpp {
 
-	typedef ClusterTypes<Rcpp::NumericMatrix::r_type::value> NumericCluster;	
+	typedef ClusterTypes<Rcpp::NumericMatrix::stored_type> NumericCluster;	
 
 	// Initialization and destruction
 	template<class Matrix, class Clusters>
@@ -34,18 +34,5 @@ namespace Rclusterpp {
 	void populate_Rhclust(const Clusters& clusters, Hclust& hclust);
 
 } // end of Rclusterpp namespace
-
-namespace Rcpp {
-
-	template <> SEXP wrap( const Rclusterpp::Hclust& hclust ) {
-		return List::create( _["merge"] = hclust.merge, _["height"] = hclust.height, _["order"] = hclust.order ); 
-	}
-
-	template <typename T> SEXP wrap( const Rclusterpp::ClusterVector<T>& clusters ) {
-		Rclusterpp::Hclust hclust(clusters.initial_clusters());
-		Rclusterpp::populate_Rhclust(clusters, hclust);
-		return Rcpp::wrap(hclust);
-	}
-}
 
 #endif

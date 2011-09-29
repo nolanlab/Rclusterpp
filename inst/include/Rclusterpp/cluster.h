@@ -6,11 +6,11 @@
 
 namespace Rclusterpp {
 	
-	template<typename Derived>
+	template<class Derived, class Distance=double>
 	class Cluster {
 		public:
 
-			typedef double distance_type;
+			typedef Distance distance_type;
 
 			static ssize_t NULLID() { return std::numeric_limits<ssize_t>::min(); } 
 	
@@ -25,7 +25,7 @@ namespace Rclusterpp {
 			ssize_t id() const { return id_; }
 			void set_id(ssize_t id) { id_ = id; } 
 			
-			size_t  size() const { return size_; }
+			size_t size() const { return size_; }
 
 			bool initial() const { return parent1_ == NULL || parent2_ == NULL; }
 			
@@ -45,16 +45,8 @@ namespace Rclusterpp {
 			Derived const * parent1_;
 			Derived const * parent2_;
 
-			double disimilarity_;
+			distance_type disimilarity_;
 
-		public:
-	
-			struct DisimilarityPredicate : std::binary_function<Derived const *, Derived const *, bool> {
-				bool operator()(Derived const * lhs, Derived const * rhs) const {
-					return lhs->disimilarity() < rhs->disimilarity();
-				}
-			};
-			static DisimilarityPredicate disimilarity_predicate() { return DisimilarityPredicate(); }
 	};
 
 	template<class Cluster>
@@ -67,40 +59,43 @@ namespace Rclusterpp {
 		return l->disimilarity() < r->disimilarity();
 	}
 
-	template<int RTYPE>
-	class ClusterWithCenter : public Cluster<ClusterWithCenter<RTYPE> > {
+	template<class Value>
+	class ClusterWithCenter : public Cluster<ClusterWithCenter<Value> > {
 		private:
-			typedef Cluster<ClusterWithCenter<RTYPE> > base_class;
+			typedef Cluster<ClusterWithCenter<Value> > base_class;
 		
 		public:
-			
-			typedef typename base_class::distance_type distance_type;
-			typedef Rcpp::Vector<RTYPE>               center_type;
-			
+
+			typedef Value                                value_type;	
+			typedef typename base_class::distance_type   distance_type;
+			typedef std::vector<Value>                   center_type;
+			typedef typename center_type::iterator       center_iterator;
+			typedef typename center_type::const_iterator center_const_iterator;
+
 		public:	
 			
 			ClusterWithCenter(ClusterWithCenter const * parent1, ClusterWithCenter const * parent2, distance_type disimilarity) : 
 				base_class(parent1, parent2, disimilarity), center_(parent1->dim()) {} 
 
-			ClusterWithCenter(ssize_t id, size_t obs_id, const center_type& vector) : base_class(id), center_(vector) {}
+			template<class V>
+			ClusterWithCenter(ssize_t id, size_t obs_id, const V& v) : base_class(id), center_(v.begin(), v.end()) {}
 			
 			size_t dim() const { return center_.size(); }
-			typename center_type::stored_type size() const { return (typename center_type::stored_type)this->base_class::size(); }
-
-			const center_type& center() const { return center_; }
 			
-			template<class T>
-			void set_center(const T& center) { center_ = center; }
+			center_iterator center_begin() { return center_.begin(); }
+			center_iterator center_end() { return center_.end(); }
+			center_const_iterator center_begin() const { return center_.begin(); }
+			center_const_iterator center_end() const { return center_.end(); }
 
 		private:
 			
 			center_type center_;
 	};
 
-	template<int RTYPE>
-	class ClusterWithObs : public Cluster<ClusterWithObs<RTYPE> > {
+	template<class Value>
+	class ClusterWithObs : public Cluster<ClusterWithObs<Value> > {
 		private:
-			typedef Cluster<ClusterWithObs<RTYPE> > base_class;
+			typedef Cluster<ClusterWithObs<Value> > base_class;
 
 		public:
 			
@@ -119,12 +114,13 @@ namespace Rclusterpp {
 				idxs_.insert(idxs_.end(), parent2->idxs_begin(), parent2->idxs_end());
 			} 
 
-			ClusterWithObs(ssize_t id, size_t obs_id, const Rcpp::Vector<RTYPE>& vector) : 
+			template<class V>
+			ClusterWithObs(ssize_t id, size_t obs_id, const V& vector) : 
 				base_class(id), idxs_(1, obs_id) {}
 	
 			const idx_type& idxs() const { return idxs_; }
 			idx_const_iterator idxs_begin() const { return idxs_.begin(); }
-			idx_const_iterator idxs_end() const { return idxs_.end(); }
+			idx_const_iterator idxs_end()   const { return idxs_.end(); }
 
 		private:
 
@@ -188,10 +184,10 @@ namespace Rclusterpp {
 	// NOTE: We can expand out this trait with template specialization
 	// to support initialization from other sources than NumericMatrix, etc.
 
-	template<int RTYPE>
+	template<class Value>
 		struct ClusterTypes {
-			typedef ClusterWithCenter<RTYPE> center;
-			typedef ClusterWithObs<RTYPE>    obs;
+			typedef ClusterWithCenter<Value> center;
+			typedef ClusterWithObs<Value>    obs;
 		};
 	
 

@@ -6,6 +6,36 @@
 
 #include <Rclusterpp.h>
 
+namespace Rcpp {
+
+	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible) {
+		switch (as<int>(x)) {
+			default: throw not_compatible("Linkage method invalid or not yet supported"); 
+			case 1: return Rclusterpp::WARD;
+			case 2: return Rclusterpp::AVERAGE;
+		}
+	}
+	
+	template <> Rclusterpp::DistanceKinds as(SEXP x) throw(not_compatible) {
+		switch (as<int>(x)) {
+			default: throw not_compatible("Distance method invalid or not yet supported"); 
+			case 1: return Rclusterpp::EUCLIDEAN;
+		}
+	}
+
+
+	template <> SEXP wrap( const Rclusterpp::Hclust& hclust ) {
+		return List::create( _["merge"] = hclust.merge, _["height"] = hclust.height, _["order"] = hclust.order ); 
+	}
+
+	template <typename T> SEXP wrap( const Rclusterpp::ClusterVector<T>& clusters ) {
+		Rclusterpp::Hclust hclust(clusters.initial_clusters());
+		Rclusterpp::populate_Rhclust(clusters, hclust);
+		return Rcpp::wrap(hclust);
+	}
+
+} // Rcpp
+
 namespace Rclusterpp {
 	
 

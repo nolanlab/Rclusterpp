@@ -27,6 +27,7 @@ namespace Rclusterpp {
 		// Distance
 		// ----------------------------------------
 
+		inline
 		double euclidean_distance(const Rcpp::NumericVector& a, const Rcpp::NumericVector& b) {
 			using namespace Rcpp;
 			return (double)sqrt( sum( square( a - b ) ) );
@@ -76,15 +77,22 @@ namespace Rclusterpp {
 		};
 
 		template<class Cluster>
-		class WardsLink : public DistanceFunctor<Cluster> {
-			public:
-				typedef typename WardsLink::result_type result_type;
-			
-				result_type operator()(const Cluster& c1, const Cluster& c2) const {
-					using namespace Rcpp;
-					result_type dist = sum( square( c1.center() - c2.center() ) );	
+		struct WardsLink : DistanceFunctor<Cluster> {
+			typedef typename Cluster::distance_type result_type;
+			typedef typename Cluster::value_type    value_type;
+
+			static result_type sqofdiff(const value_type& l, const value_type& r) { 
+				return (l - r) * (l -r); 
+			}
+
+			result_type operator()(const Cluster& c1, const Cluster& c2) const {
+					result_type dist = std::inner_product(
+							c1.center_begin(), c1.center_end(), 
+							c2.center_begin(), 
+							(result_type)0, // Inital value
+							std::plus<result_type>(), sqofdiff); // '+' and '*' operator in inner product					
 					return dist * (c1.size() * c2.size()) / (c1.size() + c2.size());
-				}
+			}
 		};
 
 		// Merge 
@@ -99,11 +107,19 @@ namespace Rclusterpp {
 		};
 
 		template<class Cluster>
-		struct WardsMerge : public MergeFunctor<Cluster> {
+		struct WardsMerge : MergeFunctor<Cluster> {						
+		
+			struct OP : std::binary_function<typename Cluster::value_type, typename Cluster::value_type, typename Cluster::value_type> {				
+				typedef typename Cluster::value_type value_type;
+				
+				size_t s1, s2, so;
+				OP(size_t s1_, size_t s2_, size_t so_) : s1(s1_), s2(s2_), so(so_) {}
+				
+				value_type operator()(const value_type& c1, const value_type& c2) const { return ((c1 * s1) + (c2 * s2)) / so; }
+			};
+			
 			void operator()(Cluster& co, const Cluster& c1, const Cluster& c2) const {
-				using namespace Rcpp;
-				NumericVector merged_center = ((c1.size() * c1.center()) + (c2.size() * c2.center())) / co.size();
-				co.set_center(merged_center);
+				std::transform(c1.center_begin(), c1.center_end(), c2.center_begin(), co.center_begin(), OP(c1.size(), c2.size(), co.size()));
 			}
 		};
 

@@ -16,14 +16,16 @@ compare.hclust <- function(h1, h2) {
  
 test.hclust.ward <- function()
 {
-  h <- hclust((dist(USArrests, method="euclidean")^2)/2.0, method="ward")
-	r <- Rclusterpp.hclust(USArrests, method="ward")
+  d <- USArrests 
+	h <- hclust((dist(d, method="euclidean")^2)/2.0, method="ward")
+	r <- Rclusterpp.hclust(d, method="ward")
 	compare.hclust(h, r)
 }
 
 test.hclust.average <- function()
 {
-	h <- hclust(dist(USArrests, method="euclidean"), method="average")
-	r <- Rclusterpp.hclust(USArrests, method="average", distance="euclidean")
+	d <- USArrests
+	h <- hclust(dist(d, method="euclidean"), method="average")
+	r <- Rclusterpp.hclust(d, method="average", distance="euclidean")
 	compare.hclust(h, r)
 }
