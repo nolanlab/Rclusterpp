@@ -50,6 +50,7 @@ namespace Rcpp {
 }
 
 #include <Rcpp.h>
+#include <Rclusterpp/sugar/square.h>
 
 #include <Rclusterpp/cluster.h>
 #include <Rclusterpp/algorithm.h>

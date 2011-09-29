@@ -29,7 +29,7 @@ namespace Rclusterpp {
 
 		double euclidean_distance(const Rcpp::NumericVector& a, const Rcpp::NumericVector& b) {
 			using namespace Rcpp;
-			return (double)sqrt( sum( pow( a - b, 2 ) ) );
+			return (double)sqrt( sum( square( a - b ) ) );
 		}
 
 		// Distance Adaptors
@@ -82,7 +82,7 @@ namespace Rclusterpp {
 			
 				result_type operator()(const Cluster& c1, const Cluster& c2) const {
 					using namespace Rcpp;
-					result_type dist = sum( pow( c1.center() - c2.center(), 2 ) );	
+					result_type dist = sum( square( c1.center() - c2.center() ) );	
 					return dist * (c1.size() * c2.size()) / (c1.size() + c2.size());
 				}
 		};
