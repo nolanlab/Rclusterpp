@@ -26,19 +26,19 @@ namespace Rclusterpp {
 		Dist_t         min_d = max_dist;
 
 #ifdef _OPENMP
-		//#pragma omp parallel	
+		//#pragma omp parallel default(none) shared(min_i, min_d, distancer)	
 #endif
 		{
-			RandomIterator min_i_l = last;
-			Dist_t         min_d_l = max_dist;
+			RandomIterator min_i_l;
+			Dist_t         min_d_l = min_d;
 
 #ifdef _OPENMP
-		//#pragma omp for nowait	
+			//#pragma omp for nowait	
 #endif
 			for (ssize_t i=0; i<(last-first); i++) {
 				Dist_t dist = distancer(*(first+i));				
 				if (dist < min_d_l) {
-					min_i_l = first + i;
+					min_i_l = first + i; 
 					min_d_l = dist;
 				}
 			}
@@ -48,8 +48,8 @@ namespace Rclusterpp {
 #endif
 			{
 				if (min_d_l < min_d) {
-					min_i = min_i_l;
-					min_d = min_d_l;
+					min_i = min_i_l; 
+					min_d = min_d_l; 
 				}
 			}
 		}
@@ -73,10 +73,10 @@ namespace Rclusterpp {
 		// Nearest neighbor chain
 		typedef std::pair<typename clusters_type::value_type, distance_type> entry_type;
 
-		std::vector<entry_type> chain;
+		std::stack<entry_type> chain;
 
-#define cluster_at_tip(x) (x).back().first
-#define distance_to_tip(x) (x).back().second
+#define cluster_at_tip(x) (x).top().first
+#define distance_to_tip(x) (x).top().second
 
 						
 		// Expand the size of clusters vector to the contain exactly the newly created clusters	
@@ -87,7 +87,7 @@ namespace Rclusterpp {
 		while (clusters.size() != result_clusters) {
 			if (chain.empty()) {
 				// Pick next "unchained" cluster as default
-				chain.push_back( entry_type(*next_unchained, std::numeric_limits<distance_type>::max()) );
+				chain.push( entry_type(*next_unchained, std::numeric_limits<distance_type>::max()) );
 				++next_unchained;
 			} else {
 
@@ -101,16 +101,16 @@ namespace Rclusterpp {
 				
 				if (nn.first != clusters.end()) {
 					std::iter_swap(next_unchained, nn_cluster(nn));
-					chain.push_back( entry_type(*next_unchained, distance_to_nn(nn)) );
+					chain.push( entry_type(*next_unchained, distance_to_nn(nn)) );
 					++next_unchained;
 				} else {
 					// Tip of chain is recursive nearest neighbor
 					cluster_type* r = cluster_at_tip(chain);
 					distance_type d = distance_to_tip(chain);
-					chain.pop_back();
+					chain.pop();
 
 					cluster_type* l  = cluster_at_tip(chain);
-					chain.pop_back();
+					chain.pop();
 
 					// Remove "tip" and "next tip"  from chain and merge into new cluster appended to "unchained" clusters
 					cluster_type* cn = new cluster_type(l, r, d);
