@@ -68,20 +68,23 @@ namespace Rclusterpp {
 
 			typedef Value                                value_type;	
 			typedef typename base_class::distance_type   distance_type;
-			typedef std::vector<Value>                   center_type;
+			typedef arma::Row<Value>                     center_type;
 			typedef typename center_type::iterator       center_iterator;
 			typedef typename center_type::const_iterator center_const_iterator;
 
 		public:	
 			
 			ClusterWithCenter(ClusterWithCenter const * parent1, ClusterWithCenter const * parent2, distance_type disimilarity) : 
-				base_class(parent1, parent2, disimilarity), center_(parent1->dim()) {} 
+				base_class(parent1, parent2, disimilarity), center_() {} 
 
 			template<class V>
-			ClusterWithCenter(ssize_t id, size_t obs_id, const V& v) : base_class(id), center_(v.begin(), v.end()) {}
+			ClusterWithCenter(ssize_t id, size_t obs_id, const V& v) : base_class(id), center_(v) {}
 			
 			size_t dim() const { return center_.size(); }
-			
+	
+			void set_center(const center_type& v) { center_ = v; }
+			const center_type& center() const { return center_; }
+
 			center_iterator center_begin() { return center_.begin(); }
 			center_iterator center_end() { return center_.end(); }
 			center_const_iterator center_begin() const { return center_.begin(); }
