@@ -21,3 +21,18 @@ for (r in ROWS) {
 	results <- rbind(results, cbind(result, obs = rep(r, nrow(result)), method = rep("ward", nrow(result))))
 }
 print(results)
+
+results <- c()
+for (r in ROWS) {
+	data <- matrix(rnorm(r * COLUMNS), nrow=r)
+	result <- benchmark( 
+		Rclusterpp = Rclusterpp.hclust(data, method="average", distance="euclidean"),
+		hclust = stats::hclust(dist(data, method="euclidean"), method="average"),
+		fastcluster = fastcluster::hclust(dist(data, method="euclidean"), method="average"),
+		replications = 5, 
+		columns=c("test", "elapsed", "user.self", "sys.self"),
+		order="elapsed"
+	)
+	results <- rbind(results, cbind(result, obs = rep(r, nrow(result)), method = rep("average:euclidean", nrow(result))))
+}
+print(results)

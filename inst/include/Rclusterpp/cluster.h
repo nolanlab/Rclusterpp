@@ -95,18 +95,17 @@ namespace Rclusterpp {
 			center_type center_;
 	};
 
-	template<class Value>
-	class ClusterWithObs : public Cluster<ClusterWithObs<Value> > {
+	class ClusterWithObs : public Cluster<ClusterWithObs> {
 		private:
-			typedef Cluster<ClusterWithObs<Value> > base_class;
+			typedef Cluster<ClusterWithObs> base_class;
 
 		public:
 			
-			typedef typename base_class::distance_type distance_type;
-			typedef typename std::vector<size_t>       idx_type;
+			typedef base_class::distance_type distance_type;
+			typedef std::vector<size_t>       idx_type;
 
-			typedef typename idx_type::iterator       idx_iterator;
-			typedef typename idx_type::const_iterator idx_const_iterator;
+			typedef idx_type::iterator       idx_iterator;
+			typedef idx_type::const_iterator idx_const_iterator;
 
 		public:
 
@@ -190,7 +189,7 @@ namespace Rclusterpp {
 	template<class Value>
 		struct ClusterTypes {
 			typedef ClusterWithCenter<Value> center;
-			typedef ClusterWithObs<Value>    obs;
+			typedef ClusterWithObs           obs;
 		};
 	
 

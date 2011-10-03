@@ -40,23 +40,13 @@ namespace Rclusterpp {
 	
 
 	template<class Matrix, class Clusters>
-	void init_clusters_from_rows(const Matrix* matrix, Clusters& clusters) {
-		for (ssize_t i=0; i<matrix->nrow(); i++) {
+	void init_clusters_from_rows(const Matrix& matrix, Clusters& clusters) {
+		for (ssize_t i=0; i<matrix.n_rows; i++) {
 			// NOTE: There is no const 'row' for Rcpp::Matrix
-			clusters[i] = Clusters::make_cluster(-(i+1), i, const_cast<Matrix*>(matrix)->row(i));
+			clusters[i] = Clusters::make_cluster(-(i+1), i, matrix.row(i));
 		}
 	}
-	
-	template<class Matrix, class Clusters>
-	void init_clusters_from_columns(const Matrix* matrix, Clusters& clusters) {
-		for (ssize_t i=0; i<matrix->ncol(); i++) {
-			// NOTE: There is no const 'column' for Rcpp::Matrix
-			clusters[i] = Clusters::make_cluster(-(i+1), i, const_cast<Matrix*>(matrix)->column(i));
-		}
-	}
-
-	
-
+		
 	template<class Clusters>
 	void populate_Rhclust(const Clusters& clusters, Hclust& hclust) {
 	
@@ -98,9 +88,11 @@ RcppExport SEXP hclust_from_data(SEXP data, SEXP link, SEXP dist) {
 BEGIN_RCPP
 	using namespace Rcpp;
 	using namespace Rclusterpp;
+	using namespace arma;
 
 	NumericMatrix data_m(data);
-	
+	mat data_a = as<mat>(data);
+
 	LinkageKinds  lk = as<LinkageKinds>(link);
 	DistanceKinds dk = as<DistanceKinds>(dist);
 
@@ -111,7 +103,7 @@ BEGIN_RCPP
 			typedef NumericCluster::center       cluster_type;
 
 			ClusterVector<cluster_type> clusters(data_m.nrow());	
-			init_clusters_from_rows(&data_m, clusters);
+			init_clusters_from_rows(data_a, clusters);
 	
 			cluster_via_rnn(wards_linkage<cluster_type>(), clusters);
 			
@@ -121,9 +113,9 @@ BEGIN_RCPP
 			typedef NumericCluster::obs         cluster_type;
 
 			ClusterVector<cluster_type> clusters(data_m.nrow());
-			init_clusters_from_rows(&data_m, clusters);
+			init_clusters_from_rows(data_a, clusters);
 
-			cluster_via_rnn(average_linkage_from_rows<cluster_type>(&data_m), clusters);
+			cluster_via_rnn( average_linkage<cluster_type>( stored_data_rows(data_a, dk) ), clusters );
 
 			return wrap(clusters);
 		}

@@ -27,29 +27,30 @@ namespace Rclusterpp {
 		// Distance
 		// ----------------------------------------
 
-		inline
-		double euclidean_distance(const Rcpp::NumericVector& a, const Rcpp::NumericVector& b) {
-			using namespace Rcpp;
-			return (double)sqrt( sum( square( a - b ) ) );
+		template<class V>
+		double euclidean_distance(const V& a, const V& b) {
+			using namespace arma;
+			return (double)sqrt( accu( square( a - b ) ) );
 		}
 
 		// Distance Adaptors
 		
-		template<class Matrix>
-		class DistanceFromStoredDataRows : public std::binary_function<size_t, size_t, double> {
+		template<class Matrix, class Distance>
+		class DistanceFromStoredDataRows : public std::binary_function<size_t, size_t, typename Distance::result_type> {
 			public:
 				typedef typename DistanceFromStoredDataRows::result_type result_type;
 
-				DistanceFromStoredDataRows(Matrix* data) : data_(data) {}	
+				DistanceFromStoredDataRows(const Matrix& data, Distance distance) : data_(data), distance_(distance) {}	
 
-				result_type operator()(size_t i1, size_t i2) {
-					return euclidean_distance(((Matrix*)data_)->row(i1), ((Matrix*)data_)->row(i2));
+				result_type operator()(size_t i1, size_t i2) const {
+					return distance_(data_.row(i1), data_.row(i2));
 				}
 
 			private:	
 				DistanceFromStoredDataRows() {}
 
-				Matrix* data_;
+				const Matrix& data_;
+				Distance distance_;
 		};
 
 		// Link Adaptors
@@ -61,7 +62,7 @@ namespace Rclusterpp {
 			
 				AverageLink(Distance d) : d_(d) {}
 			
-				result_type operator()(const Cluster& c1, const Cluster& c2) {
+				result_type operator()(const Cluster& c1, const Cluster& c2) const {
 					result_type result = 0.;
 					typedef typename Cluster::idx_const_iterator iter;
 					for (iter i=c1.idxs_begin(), ie=c1.idxs_end(); i!=ie; ++i) {
@@ -80,9 +81,7 @@ namespace Rclusterpp {
 		struct WardsLink : DistanceFunctor<Cluster> {
 			typedef typename Cluster::distance_type result_type;		
 			result_type operator()(const Cluster& c1, const Cluster& c2) const {
-				// % == element-wise multiplication
-				return 
-					arma::accu( (c1.center() - c2.center())	% (c1.center() - c2.center()) ) * (c1.size() * c2.size()) / (c1.size() + c2.size()); 
+				return arma::accu( square( c1.center() - c2.center() ) ) * (c1.size() * c2.size()) / (c1.size() + c2.size()); 
 			}
 		};
 
@@ -124,22 +123,41 @@ namespace Rclusterpp {
 	};
 
 
+	template<class Matrix, class Distance>
+	Methods::DistanceFromStoredDataRows<Matrix, Distance> stored_data_rows(const Matrix& m, Distance d) {
+		return Methods::DistanceFromStoredDataRows<Matrix, Distance>(m, d);
+	}
+
+	template<class Matrix, class Result, class Vector>
+	Methods::DistanceFromStoredDataRows<Matrix, std::pointer_to_binary_function<Vector, Vector, Result> > 
+	stored_data_rows(const Matrix& m, Result (*d)(Vector, Vector)) {
+		return stored_data_rows(m, std::ptr_fun(d)); 
+	}
+
+	template<class Matrix>
+	Methods::DistanceFromStoredDataRows<
+		Matrix, 
+		std::pointer_to_binary_function<const arma::Row<typename Matrix::elem_type>&, const arma::Row<typename Matrix::elem_type>&, double> 
+	> 
+	stored_data_rows(const Matrix& m, DistanceKinds dk) {
+		switch (dk) {
+			default:
+				throw std::invalid_argument("Linkage or distance method not yet supported");
+			case Rclusterpp::EUCLIDEAN:
+				return stored_data_rows(m, &Methods::euclidean_distance<arma::Row<typename Matrix::elem_type> >);
+		}
+	}
+
 	template<class Cluster>
 	LinkageMethod<Cluster, Methods::WardsLink<Cluster>, Methods::WardsMerge<Cluster> > wards_linkage() {
 		return LinkageMethod<Cluster, Methods::WardsLink<Cluster>, Methods::WardsMerge<Cluster> >();
 	}
 
-	template<class Cluster, class Matrix>
-	LinkageMethod<
-		Cluster, 
-		Methods::AverageLink<Cluster, Methods::DistanceFromStoredDataRows<Matrix> >, 
-		Methods::NoOpMerge<Cluster> 
-	> average_linkage_from_rows(Matrix* matrix) {
-		return LinkageMethod<
-			Cluster, 
-			Methods::AverageLink<Cluster, Methods::DistanceFromStoredDataRows<Matrix> >, 
-			Methods::NoOpMerge<Cluster> 
-		>(Methods::AverageLink<Cluster, Methods::DistanceFromStoredDataRows<Matrix> >(Methods::DistanceFromStoredDataRows<Matrix>(matrix))); 
+	template<class Cluster, class Distance>
+	LinkageMethod<Cluster, Methods::AverageLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> > average_linkage(Distance d) {
+		return LinkageMethod<Cluster, Methods::AverageLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> >(
+				Methods::AverageLink<Cluster, Distance>(d)
+				); 
 	}
 	
 	

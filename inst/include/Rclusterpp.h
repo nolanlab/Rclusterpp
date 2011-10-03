@@ -40,7 +40,6 @@ namespace Rcpp {
 #include <RcppArmadilloForward.h>
 #include <Rcpp.h>
 #include <RcppArmadilloWrap.h>
-#include <Rclusterpp/sugar/square.h>
 
 #include <Rclusterpp/cluster.h>
 #include <Rclusterpp/algorithm.h>

@@ -6,11 +6,9 @@ namespace Rclusterpp {
 	typedef ClusterTypes<Rcpp::NumericMatrix::stored_type> NumericCluster;	
 
 	// Initialization and destruction
-	template<class Matrix, class Clusters>
-	void init_clusters_from_rows(const Matrix* matrix, Clusters& clusters);
 
 	template<class Matrix, class Clusters>
-	void init_clusters_from_columns(const Matrix* matrix, Clusters& clusters);
+	void init_clusters_from_rows(const Matrix& matrix, Clusters& clusters);
 
 	// Translate clustering results to format expected by R...
 	
