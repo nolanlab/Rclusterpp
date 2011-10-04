@@ -137,14 +137,14 @@ namespace Rclusterpp {
 	template<class Matrix>
 	Methods::DistanceFromStoredDataRows<
 		Matrix, 
-		std::pointer_to_binary_function<const arma::Row<typename Matrix::elem_type>&, const arma::Row<typename Matrix::elem_type>&, double> 
+		std::pointer_to_binary_function<const arma::subview_row<typename Matrix::elem_type>&, const arma::subview_row<typename Matrix::elem_type>&, double> 
 	> 
 	stored_data_rows(const Matrix& m, DistanceKinds dk) {
 		switch (dk) {
 			default:
 				throw std::invalid_argument("Linkage or distance method not yet supported");
 			case Rclusterpp::EUCLIDEAN:
-				return stored_data_rows(m, &Methods::euclidean_distance<arma::Row<typename Matrix::elem_type> >);
+				return stored_data_rows(m, &Methods::euclidean_distance<arma::subview_row<typename Matrix::elem_type> >);
 		}
 	}
 
