@@ -26,7 +26,7 @@ namespace Rclusterpp {
 		Dist_t         min_d = max_dist;
 
 #ifdef _OPENMP
-		#pragma omp parallel default(none) shared(min_i, min_d, distancer)	
+		#pragma omp parallel shared(min_i, min_d, distancer)	
 #endif
 		{
 			RandomIterator min_i_l;
