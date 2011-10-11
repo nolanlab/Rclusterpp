@@ -29,8 +29,8 @@ namespace Rclusterpp {
 
 		template<class V>
 		double euclidean_distance(const V& a, const V& b) {
-			using namespace arma;
-			return (double)sqrt( accu( square( a - b ) ) );
+			using namespace Eigen;
+			return (double)sqrt(((a-b).array().square().sum()));
 		}
 
 		// Distance Adaptors
@@ -81,7 +81,7 @@ namespace Rclusterpp {
 		struct WardsLink : DistanceFunctor<Cluster> {
 			typedef typename Cluster::distance_type result_type;		
 			result_type operator()(const Cluster& c1, const Cluster& c2) const {
-				return arma::accu( square( c1.center() - c2.center() ) ) * (c1.size() * c2.size()) / (c1.size() + c2.size()); 
+				return (c1.center() - c2.center()).square().sum() * (c1.size() * c2.size()) / (c1.size() + c2.size()); 
 			}
 		};
 
@@ -123,28 +123,22 @@ namespace Rclusterpp {
 	};
 
 
-	template<class Matrix, class Distance>
-	Methods::DistanceFromStoredDataRows<Matrix, Distance> stored_data_rows(const Matrix& m, Distance d) {
-		return Methods::DistanceFromStoredDataRows<Matrix, Distance>(m, d);
-	}
-
-	template<class Matrix, class Result, class Vector>
-	Methods::DistanceFromStoredDataRows<Matrix, std::pointer_to_binary_function<Vector, Vector, Result> > 
-	stored_data_rows(const Matrix& m, Result (*d)(Vector, Vector)) {
-		return stored_data_rows(m, std::ptr_fun(d)); 
-	}
-
 	template<class Matrix>
 	Methods::DistanceFromStoredDataRows<
 		Matrix, 
-		std::pointer_to_binary_function<const arma::subview_row<typename Matrix::elem_type>&, const arma::subview_row<typename Matrix::elem_type>&, double> 
+		std::pointer_to_binary_function<typename Matrix::ConstRowXpr&, typename Matrix::ConstRowXpr&, double> 
 	> 
 	stored_data_rows(const Matrix& m, DistanceKinds dk) {
+		typedef Methods::DistanceFromStoredDataRows<
+			Matrix, 
+			std::pointer_to_binary_function<typename Matrix::ConstRowXpr&, typename Matrix::ConstRowXpr&, double> 
+		> distancer_type;
+
 		switch (dk) {
 			default:
 				throw std::invalid_argument("Linkage or distance method not yet supported");
 			case Rclusterpp::EUCLIDEAN:
-				return stored_data_rows(m, &Methods::euclidean_distance<arma::subview_row<typename Matrix::elem_type> >);
+				return distancer_type(m, std::ptr_fun(&Methods::euclidean_distance<typename Matrix::ConstRowXpr>));
 		}
 	}
 
@@ -156,8 +150,8 @@ namespace Rclusterpp {
 	template<class Cluster, class Distance>
 	LinkageMethod<Cluster, Methods::AverageLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> > average_linkage(Distance d) {
 		return LinkageMethod<Cluster, Methods::AverageLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> >(
-				Methods::AverageLink<Cluster, Distance>(d)
-				); 
+			Methods::AverageLink<Cluster, Distance>(d)
+		); 
 	}
 	
 	

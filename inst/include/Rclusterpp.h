@@ -37,9 +37,9 @@ namespace Rcpp {
 	template <typename T> SEXP wrap( const Rclusterpp::ClusterVector<T>& ) ;
 }
 
-#include <RcppArmadilloForward.h>
+#include <RcppEigenForward.h>
 #include <Rcpp.h>
-#include <RcppArmadilloWrap.h>
+#include <RcppEigenWrap.h>
 
 #include <Rclusterpp/cluster.h>
 #include <Rclusterpp/algorithm.h>

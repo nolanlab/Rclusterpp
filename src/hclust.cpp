@@ -41,12 +41,12 @@ namespace Rclusterpp {
 
 	template<class Matrix, class Clusters>
 	void init_clusters_from_rows(const Matrix& matrix, Clusters& clusters) {
-		for (ssize_t i=0; i<matrix.n_rows; i++) {
+		for (ssize_t i=0; i<matrix.rows(); i++) {
 			// NOTE: There is no const 'row' for Rcpp::Matrix
 			clusters[i] = Clusters::make_cluster(-(i+1), i, matrix.row(i));
 		}
 	}
-		
+	
 	template<class Clusters>
 	void populate_Rhclust(const Clusters& clusters, Hclust& hclust) {
 	
@@ -88,10 +88,11 @@ RcppExport SEXP hclust_from_data(SEXP data, SEXP link, SEXP dist) {
 BEGIN_RCPP
 	using namespace Rcpp;
 	using namespace Rclusterpp;
-	using namespace arma;
 
 	NumericMatrix data_m(data);
-	mat data_a = as<mat>(data);
+	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> data_e(
+		as<Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > >(data)
+	);
 
 	LinkageKinds  lk = as<LinkageKinds>(link);
 	DistanceKinds dk = as<DistanceKinds>(dist);
@@ -102,8 +103,8 @@ BEGIN_RCPP
 		case Rclusterpp::WARD: {
 			typedef NumericCluster::center       cluster_type;
 
-			ClusterVector<cluster_type> clusters(data_m.nrow());	
-			init_clusters_from_rows(data_a, clusters);
+			ClusterVector<cluster_type> clusters(data_e.rows());	
+			init_clusters_from_rows(data_e, clusters);
 	
 			cluster_via_rnn(wards_linkage<cluster_type>(), clusters);
 			
@@ -112,10 +113,10 @@ BEGIN_RCPP
 		case Rclusterpp::AVERAGE: {
 			typedef NumericCluster::obs         cluster_type;
 
-			ClusterVector<cluster_type> clusters(data_m.nrow());
-			init_clusters_from_rows(data_a, clusters);
+			ClusterVector<cluster_type> clusters(data_e.rows());
+			init_clusters_from_rows(data_e, clusters);
 
-			cluster_via_rnn( average_linkage<cluster_type>( stored_data_rows(data_a, dk) ), clusters );
+			cluster_via_rnn( average_linkage<cluster_type>( stored_data_rows(data_e, dk) ), clusters );
 
 			return wrap(clusters);
 		}
