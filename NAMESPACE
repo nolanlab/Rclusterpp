@@ -1,2 +1,2 @@
 useDynLib(Rclusterpp)
-exportPattern("^[[:alpha:]]+")
+#exportPattern("^[[:alpha:]]+")

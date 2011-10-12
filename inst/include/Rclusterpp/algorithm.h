@@ -5,7 +5,7 @@
 #include <utility>
 #include <algorithm>
 #include <functional>
-#include <vector>
+#include <stack>
 
 #include <Rclusterpp/cluster.h>
 #include <Rclusterpp/util.h>
