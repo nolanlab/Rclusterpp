@@ -1,2 +1,2 @@
 useDynLib(Rclusterpp)
-#exportPattern("^[[:alpha:]]+")
+export("Rclusterpp.hclust")

@@ -40,6 +40,7 @@ namespace Rcpp {
 #include <RcppEigenForward.h>
 #include <Rcpp.h>
 #include <RcppEigenWrap.h>
+#include <EigenSugar.h>
 
 #include <Rclusterpp/cluster.h>
 #include <Rclusterpp/algorithm.h>

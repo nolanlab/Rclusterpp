@@ -30,7 +30,8 @@ namespace Rclusterpp {
 		template<class V>
 		double euclidean_distance(const V& a, const V& b) {
 			using namespace Eigen;
-			return (double)sqrt(((a-b).array().square().sum()));
+			// Element wise operations require conversion to array...
+			return (double)sqrt( sum( square( (a-b).array() ) ) );
 		}
 
 		// Distance Adaptors
@@ -81,7 +82,8 @@ namespace Rclusterpp {
 		struct WardsLink : DistanceFunctor<Cluster> {
 			typedef typename Cluster::distance_type result_type;		
 			result_type operator()(const Cluster& c1, const Cluster& c2) const {
-				return (c1.center() - c2.center()).square().sum() * (c1.size() * c2.size()) / (c1.size() + c2.size()); 
+				using namespace Eigen;
+				return sum( square( c1.center() - c2.center() ) ) * (c1.size() * c2.size()) / (c1.size() + c2.size()); 
 			}
 		};
 
