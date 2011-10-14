@@ -28,10 +28,15 @@ namespace Rclusterpp {
 		// ----------------------------------------
 
 		template<class V>
-		double euclidean_distance(const V& a, const V& b) {
+		typename V::RealScalar euclidean_distance(const V& a, const V& b) {
 			using namespace Eigen;
-			// Element wise operations require conversion to array...
-			return (double)sqrt( sum( square( (a-b).array() ) ) );
+			return norm( a - b ); 
+		}
+
+		template<class V>
+		typename V::RealScalar manhattan_distance(const V& a, const V& b) {
+			using namespace Eigen;
+			return sum( Eigen::abs( a - b ) );  // Note abs is ambiguous to use explicit namespace
 		}
 
 		// Distance Adaptors
@@ -83,7 +88,7 @@ namespace Rclusterpp {
 			typedef typename Cluster::distance_type result_type;		
 			result_type operator()(const Cluster& c1, const Cluster& c2) const {
 				using namespace Eigen;
-				return sum( square( c1.center() - c2.center() ) ) * (c1.size() * c2.size()) / (c1.size() + c2.size()); 
+				return squaredNorm( c1.center() - c2.center() ) * (c1.size() * c2.size()) / (c1.size() + c2.size()); 
 			}
 		};
 
@@ -124,25 +129,28 @@ namespace Rclusterpp {
 			distancer(distancer), merger(merger) {}
 	};
 
+#define CONST_ROW Matrix::ConstRowXpr
 
 	template<class Matrix>
 	Methods::DistanceFromStoredDataRows<
-		Matrix, 
-		std::pointer_to_binary_function<typename Matrix::ConstRowXpr&, typename Matrix::ConstRowXpr&, double> 
+		Matrix, std::pointer_to_binary_function<typename CONST_ROW&, typename CONST_ROW&, typename Matrix::RealScalar> 
 	> 
 	stored_data_rows(const Matrix& m, DistanceKinds dk) {
 		typedef Methods::DistanceFromStoredDataRows<
-			Matrix, 
-			std::pointer_to_binary_function<typename Matrix::ConstRowXpr&, typename Matrix::ConstRowXpr&, double> 
+			Matrix, std::pointer_to_binary_function<typename CONST_ROW&, typename CONST_ROW&, typename Matrix::RealScalar> 
 		> distancer_type;
 
 		switch (dk) {
 			default:
 				throw std::invalid_argument("Linkage or distance method not yet supported");
 			case Rclusterpp::EUCLIDEAN:
-				return distancer_type(m, std::ptr_fun(&Methods::euclidean_distance<typename Matrix::ConstRowXpr>));
+				return distancer_type(m, std::ptr_fun(&Methods::euclidean_distance<typename CONST_ROW>));
+			case Rclusterpp::MANHATTAN:
+				return distancer_type(m, std::ptr_fun(&Methods::manhattan_distance<typename CONST_ROW>));
 		}
 	}
+
+#undef CONST_ROW
 
 	template<class Cluster>
 	LinkageMethod<Cluster, Methods::WardsLink<Cluster>, Methods::WardsMerge<Cluster> > wards_linkage() {

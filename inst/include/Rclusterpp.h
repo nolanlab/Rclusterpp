@@ -11,7 +11,8 @@ namespace Rclusterpp {
 	};
 
 	enum DistanceKinds {
-		EUCLIDEAN
+		EUCLIDEAN,
+		MANHATTAN
 	};
 
 	class Hclust;
@@ -37,10 +38,12 @@ namespace Rcpp {
 	template <typename T> SEXP wrap( const Rclusterpp::ClusterVector<T>& ) ;
 }
 
+#define EIGEN_MATRIXBASE_PLUGIN <RclusterppEigenMatrixPlugin.h>
+#define EIGEN_ARRAYBASE_PLUGIN <RclusterppEigenArrayPlugin.h>
 #include <RcppEigenForward.h>
 #include <Rcpp.h>
 #include <RcppEigenWrap.h>
-#include <EigenSugar.h>
+#include <RclusterppEigenSugar.h>
 
 #include <Rclusterpp/cluster.h>
 #include <Rclusterpp/algorithm.h>

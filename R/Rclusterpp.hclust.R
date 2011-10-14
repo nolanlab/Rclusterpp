@@ -9,7 +9,7 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
 	if (class(x) == "dist") {
 		return(hclust(x, METHODS[method], members))
 	} else {
-		DISTANCES <- c("euclidean")
+		DISTANCES <- c("euclidean", "manhattan")
 		distance  <- pmatch(distance, DISTANCES)
 		if (is.na(distance))
 			stop("Invalid distance metric")
@@ -26,7 +26,7 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
 		             data = x,
 								 link = as.integer(method), 
 								 dist = as.integer(distance),
-								 DUP = FALSE, NAOK = TRUE, PACKAGE = "Rclusterpp" )
+								 DUP = FALSE, NAOK = FALSE, PACKAGE = "Rclusterpp" )
 		
 		hcl$labels = row.names(x)
 		hcl$method = METHODS[method]

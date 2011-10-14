@@ -20,6 +20,7 @@ namespace Rcpp {
 		switch (as<int>(x)) {
 			default: throw not_compatible("Distance method invalid or not yet supported"); 
 			case 1: return Rclusterpp::EUCLIDEAN;
+			case 2: return Rclusterpp::MANHATTAN;
 		}
 	}
 
