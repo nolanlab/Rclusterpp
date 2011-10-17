@@ -39,6 +39,25 @@ namespace Rclusterpp {
 			return sum( Eigen::abs( a - b ) );  // Note abs is ambiguous to use explicit namespace
 		}
 
+		template<class V>
+		typename V::RealScalar maximum_distance(const V& a, const V& b) {
+			using namespace Eigen;
+			return maxCoeff( Eigen::abs( a - b ) );  // Note abs is ambiguous to use explicit namespace
+		}
+
+		namespace {
+			// TODO: Encapsulate this with function binding instead of using a global variable. Will
+			// require more sophisticated typing for distance functions.
+			double minkowski_power_g = 1.0;
+		}
+
+		template<class V>
+		typename V::RealScalar minkowski_distance(const V& a, const V& b) {
+			using namespace Eigen;
+			return lpNorm( a - b, minkowski_power_g );
+		}
+
+
 		// Distance Adaptors
 		
 		template<class Matrix, class Distance>
@@ -125,8 +144,7 @@ namespace Rclusterpp {
 		Distancer distancer;
 		Merger    merger;
 
-		LinkageMethod(Distancer distancer=Distancer(), Merger merger=Merger()) : 
-			distancer(distancer), merger(merger) {}
+		LinkageMethod(Distancer distancer=Distancer(), Merger merger=Merger()) : distancer(distancer), merger(merger) {}
 	};
 
 #define CONST_ROW Matrix::ConstRowXpr
@@ -135,7 +153,7 @@ namespace Rclusterpp {
 	Methods::DistanceFromStoredDataRows<
 		Matrix, std::pointer_to_binary_function<typename CONST_ROW&, typename CONST_ROW&, typename Matrix::RealScalar> 
 	> 
-	stored_data_rows(const Matrix& m, DistanceKinds dk) {
+	stored_data_rows(const Matrix& m, DistanceKinds dk, double minkowski=1.0) {
 		typedef Methods::DistanceFromStoredDataRows<
 			Matrix, std::pointer_to_binary_function<typename CONST_ROW&, typename CONST_ROW&, typename Matrix::RealScalar> 
 		> distancer_type;
@@ -147,11 +165,17 @@ namespace Rclusterpp {
 				return distancer_type(m, std::ptr_fun(&Methods::euclidean_distance<typename CONST_ROW>));
 			case Rclusterpp::MANHATTAN:
 				return distancer_type(m, std::ptr_fun(&Methods::manhattan_distance<typename CONST_ROW>));
+			case Rclusterpp::MAXIMUM:
+				return distancer_type(m, std::ptr_fun(&Methods::maximum_distance<typename CONST_ROW>));
+			case Rclusterpp::MINKOWSKI:
+				Methods::minkowski_power_g = minkowski;
+				return distancer_type(m, std::ptr_fun(&Methods::minkowski_distance<typename CONST_ROW>));
+
 		}
 	}
 
 #undef CONST_ROW
-
+	
 	template<class Cluster>
 	LinkageMethod<Cluster, Methods::WardsLink<Cluster>, Methods::WardsMerge<Cluster> > wards_linkage() {
 		return LinkageMethod<Cluster, Methods::WardsLink<Cluster>, Methods::WardsMerge<Cluster> >();
@@ -163,8 +187,7 @@ namespace Rclusterpp {
 			Methods::AverageLink<Cluster, Distance>(d)
 		); 
 	}
-	
-	
+		
 } // end of Rclusterpp namespace
 
 #endif

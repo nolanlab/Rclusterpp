@@ -123,7 +123,7 @@ namespace Rclusterpp {
 		// Cleanup cluster listing
 		
 		// Re-order the clusters, with initial clusters in the beginning, ordered by id
-		// from 0 .. -initial_clusters, followed by the agglomerated clusters sorted by
+		// from -1 .. -initial_clusters, followed by the agglomerated clusters sorted by
 		// increasing disimilarity.
 		
 		std::partition(clusters.begin(), clusters.end(), std::mem_fun(&cluster_type::initial));

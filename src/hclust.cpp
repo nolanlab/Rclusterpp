@@ -21,6 +21,8 @@ namespace Rcpp {
 			default: throw not_compatible("Distance method invalid or not yet supported"); 
 			case 1: return Rclusterpp::EUCLIDEAN;
 			case 2: return Rclusterpp::MANHATTAN;
+			case 3: return Rclusterpp::MAXIMUM;
+			case 4: return Rclusterpp::MINKOWSKI;
 		}
 	}
 
@@ -85,7 +87,7 @@ namespace Rclusterpp {
 
 } // end of Rclusterpp namespace
 
-RcppExport SEXP hclust_from_data(SEXP data, SEXP link, SEXP dist) {
+RcppExport SEXP hclust_from_data(SEXP data, SEXP link, SEXP dist, SEXP minkowski) {
 BEGIN_RCPP
 	using namespace Rcpp;
 	using namespace Rclusterpp;
@@ -117,7 +119,7 @@ BEGIN_RCPP
 			ClusterVector<cluster_type> clusters(data_e.rows());
 			init_clusters_from_rows(data_e, clusters);
 
-			cluster_via_rnn( average_linkage<cluster_type>( stored_data_rows(data_e, dk) ), clusters );
+			cluster_via_rnn( average_linkage<cluster_type>( stored_data_rows(data_e, dk, as<double>(minkowski)) ), clusters );
 
 			return wrap(clusters);
 		}

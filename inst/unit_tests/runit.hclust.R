@@ -39,3 +39,22 @@ test.hclust.average.manhattan <- function()
 	r <- Rclusterpp.hclust(d, method="average", distance="manhattan")
 	compare.hclust(h, r)
 }
+
+test.hclust.average.maximum <- function()
+{
+	d <- USArrests
+	
+	h <- hclust(dist(d, method="maximum"), method="average")
+	r <- Rclusterpp.hclust(d, method="average", distance="maximum")
+	# USArrests clusters ambiguously under this metric, so only heights will match exactly
+	checkEquals(r$height, h$height, msg="Agglomeration heights are not equal")
+}
+
+test.hclust.average.minkowski <- function()
+{
+	d <- USArrests
+	
+	h <- hclust(dist(d, method="minkowski"), method="average")
+	r <- Rclusterpp.hclust(d, method="average", distance="minkowski")
+	compare.hclust(h, r)
+}

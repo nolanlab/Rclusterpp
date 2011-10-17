@@ -20,8 +20,8 @@ namespace Rclusterpp {
 
 		template<class OP>
 		inline binder1st_P<OP> bind1st_P(OP& o, typename OP::first_argument_type const* a) { return binder1st_P<OP>(o,a); } 
-		
-	} // end of Util namespace
+	
+		} // end of Util namespace
 	
 } // end of Rclusterpp namespace
 

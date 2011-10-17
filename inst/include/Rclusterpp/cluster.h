@@ -69,9 +69,7 @@ namespace Rclusterpp {
 			typedef Value                                value_type;	
 			typedef typename base_class::distance_type   distance_type;
 			typedef Eigen::Array<Value,1,Eigen::Dynamic> center_type;
-			//typedef typename center_type::iterator       center_iterator;
-			//typedef typename center_type::const_iterator center_const_iterator;
-
+			
 		public:	
 			
 			ClusterWithCenter(ClusterWithCenter const * parent1, ClusterWithCenter const * parent2, distance_type disimilarity) : 
@@ -84,12 +82,7 @@ namespace Rclusterpp {
 	
 			void set_center(const center_type& v) { center_ = v; }
 			const center_type& center() const { return center_; }
-
-			//center_iterator center_begin() { return center_.begin(); }
-			//center_iterator center_end() { return center_.end(); }
-			//center_const_iterator center_begin() const { return center_.begin(); }
-			//center_const_iterator center_end() const { return center_.end(); }
-
+	
 		private:
 			
 			center_type center_;
