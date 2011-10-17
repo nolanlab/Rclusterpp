@@ -5,7 +5,8 @@ namespace Rclusterpp {
 
 	enum LinkageKinds {
 		WARD,
-		AVERAGE
+		AVERAGE,
+		SINGLE
 	};
 
 	enum DistanceKinds {

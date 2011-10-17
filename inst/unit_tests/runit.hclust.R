@@ -58,3 +58,42 @@ test.hclust.average.minkowski <- function()
 	r <- Rclusterpp.hclust(d, method="average", distance="minkowski")
 	compare.hclust(h, r)
 }
+
+test.hclust.single.euclidean <- function()
+{
+	d <- USArrests
+	
+	h <- hclust(dist(d, method="euclidean"), method="single")
+	r <- Rclusterpp.hclust(d, method="single", distance="euclidean")
+	compare.hclust(h, r)
+}
+
+test.hclust.single.manhattan <- function()
+{
+	d <- USArrests
+	
+	h <- hclust(dist(d, method="manhattan"), method="single")
+	r <- Rclusterpp.hclust(d, method="single", distance="manhattan")
+	# USArrests clusters ambiguously under this metric, so only heights will match exactly
+	checkEquals(r$height, h$height, msg="Agglomeration heights are not equal")
+}
+
+test.hclust.single.maximum <- function()
+{
+	d <- USArrests
+	
+	h <- hclust(dist(d, method="maximum"), method="single")
+	r <- Rclusterpp.hclust(d, method="single", distance="maximum")
+	# USArrests clusters ambiguously under this metric, so only heights will match exactly
+	checkEquals(r$height, h$height, msg="Agglomeration heights are not equal")
+}
+
+test.hclust.single.minkowski <- function()
+{
+	d <- USArrests
+	
+	h <- hclust(dist(d, method="minkowski"), method="single")
+	r <- Rclusterpp.hclust(d, method="single", distance="minkowski")
+	compare.hclust(h, r)
+}
+

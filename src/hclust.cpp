@@ -13,6 +13,7 @@ namespace Rcpp {
 			default: throw not_compatible("Linkage method invalid or not yet supported"); 
 			case 1: return Rclusterpp::WARD;
 			case 2: return Rclusterpp::AVERAGE;
+			case 3: return Rclusterpp::SINGLE;
 		}
 	}
 	
@@ -104,7 +105,7 @@ BEGIN_RCPP
 		default:
 			throw std::invalid_argument("Linkage or distance method not yet supported");
 		case Rclusterpp::WARD: {
-			typedef NumericCluster::center       cluster_type;
+			typedef NumericCluster::center cluster_type;
 
 			ClusterVector<cluster_type> clusters(data_e.rows());	
 			init_clusters_from_rows(data_e, clusters);
@@ -114,12 +115,22 @@ BEGIN_RCPP
 			return wrap(clusters);	
 		}
 		case Rclusterpp::AVERAGE: {
-			typedef NumericCluster::obs         cluster_type;
+			typedef NumericCluster::obs cluster_type;
 
 			ClusterVector<cluster_type> clusters(data_e.rows());
 			init_clusters_from_rows(data_e, clusters);
 
 			cluster_via_rnn( average_linkage<cluster_type>( stored_data_rows(data_e, dk, as<double>(minkowski)) ), clusters );
+
+			return wrap(clusters);
+		}
+		case Rclusterpp::SINGLE: {
+			typedef NumericCluster::plain cluster_type;
+
+			ClusterVector<cluster_type> clusters(data_e.rows());
+			init_clusters_from_rows(data_e, clusters);
+
+			cluster_via_slink( stored_data_rows(data_e, dk, as<double>(minkowski)), clusters );
 
 			return wrap(clusters);
 		}

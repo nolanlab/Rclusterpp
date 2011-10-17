@@ -21,7 +21,7 @@ namespace Rclusterpp {
 			
 			Cluster(Derived const * parent1, Derived const * parent2, distance_type disimilarity) :
 				id_(NULLID()), size_(parent1->size()+parent2->size()), parent1_(parent1), parent2_(parent2), disimilarity_(disimilarity) {}
-			
+							
 			ssize_t id() const { return id_; }
 			void set_id(ssize_t id) { id_ = id; } 
 			
@@ -58,6 +58,26 @@ namespace Rclusterpp {
 	inline bool compare_disimilarity(Cluster const* l, Cluster const* r) {
 		return l->disimilarity() < r->disimilarity();
 	}
+
+
+	class ClusterWithID : public Cluster<ClusterWithID> {
+		private:
+			typedef Cluster<ClusterWithID> base_class;
+		
+		public:
+
+			typedef base_class::distance_type distance_type;
+			
+		public:	
+			
+			ClusterWithID(ClusterWithID const * parent1, ClusterWithID const * parent2, distance_type disimilarity) : 
+				base_class(parent1, parent2, disimilarity) {} 
+
+			template<class V>
+			ClusterWithID(ssize_t id, size_t obs_id, const V& v) : base_class(id) {}
+			
+	};
+
 
 	template<class Value>
 	class ClusterWithCenter : public Cluster<ClusterWithCenter<Value> > {
@@ -131,6 +151,7 @@ namespace Rclusterpp {
 		public:
 
 			typedef T cluster_type;
+			typedef typename cluster_type::distance_type      distance_type;
 			typedef typename underlying_type::value_type      value_type;
 			typedef typename underlying_type::reference       reference;
 			typedef typename underlying_type::const_reference const_reference;
@@ -165,6 +186,11 @@ namespace Rclusterpp {
 				return new cluster_type(id, obs_id, vector);
 			}
 
+			static cluster_type* make_cluster(cluster_type const * parent1, cluster_type const * parent2, distance_type disimilarity) {
+				return new cluster_type(parent1, parent2, disimilarity);
+			}
+
+
 		private:
 
 			ClusterVector() : clusters_() {}
@@ -181,6 +207,7 @@ namespace Rclusterpp {
 
 	template<class Value>
 		struct ClusterTypes {
+			typedef ClusterWithID            plain;
 			typedef ClusterWithCenter<Value> center;
 			typedef ClusterWithObs           obs;
 		};

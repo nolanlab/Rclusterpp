@@ -136,6 +136,93 @@ namespace Rclusterpp {
 
 	}
 
+	namespace {
+
+		typedef std::pair<size_t, size_t> Merge_t;
+
+		inline Merge_t make_merge(size_t from, size_t into) { return std::make_pair(from, into); }
+		inline size_t from(const Merge_t& m) { return m.first; }
+		inline size_t into(const Merge_t& m) { return m.second; }
+
+		template<class Distance>
+		struct MergeCMP {
+			const Distance& height;
+		
+			MergeCMP(const Distance& height_) : height(height_) {}	
+			bool operator()(const Merge_t& a, const Merge_t& b) const {	
+				return height[from(a)] < height[from(b)];	
+			}
+    };
+
+	} // end of anonymous namespace		
+
+	template<class Distancer, class ClusterVector>
+	void cluster_via_slink(const Distancer& distancer, ClusterVector& clusters) {
+
+		typedef typename Distancer::result_type distance_type;
+
+		size_t initial_clusters = clusters.size(), result_clusters = (initial_clusters * 2) - 1;
+		clusters.reserve(result_clusters);
+
+		std::vector<size_t> P = std::vector<size_t>(initial_clusters);
+		std::vector<distance_type> L = std::vector<distance_type>(initial_clusters);
+		std::vector<distance_type> M = std::vector<distance_type>(initial_clusters);
+
+		for (size_t i=0; i<initial_clusters; i++) {
+			// Step 1: Initialize
+			P[i] = i;
+			L[i] = std::numeric_limits<distance_type>::max();
+
+			// Step 2: Build out pairwise distances from objects in pointer
+			// represenation to the new object
+#ifdef _OPENMP	
+			#pragma omp parallel for shared(i, M)
+#endif
+			for (ssize_t j=0; j<(ssize_t)i; j++) {
+				M[j] = distancer(i, j); 
+			}
+
+			// Step 3: Update M, P, L
+			for (size_t j=0; j<i; j++) {
+				distance_type l = L[j], m = M[j];
+				if (l >= m) {
+					M[P[j]] = std::min(M[P[j]], l);
+					L[j]    = m;
+					P[j]    = i;
+				} else {
+					M[P[j]] = std::min(M[P[j]], m);
+				}
+			}
+
+			// Step 4: Actualize the clusters
+			for (size_t j=0; j<i; j++) {
+				if (L[j] >= L[P[j]])
+					P[j] = i;
+			}
+		}
+
+		// Convert the pointer representation to dendogram 
+		std::vector<Merge_t> merges = std::vector<Merge_t>(initial_clusters-1);
+		for (size_t i=0; i<(initial_clusters-1); i++) {
+			merges[i] = make_merge(i, P[i]); // from, into
+		}
+		std::sort(merges.begin(), merges.end(), MergeCMP<std::vector<distance_type> >(L));
+		for (size_t i=0; i<initial_clusters; i++) {
+			P[i] = i;
+		}
+		for (size_t i=0; i<(initial_clusters-1); i++) {
+			size_t f = from(merges[i]), t = into(merges[i]);
+			clusters.push_back(ClusterVector::make_cluster( clusters[P[f]], clusters[P[t]], L[f] ));
+			P[t] = i + initial_clusters;
+		}
+		
+		for (size_t i=initial_clusters; i<result_clusters; i++) {
+			clusters[i]->set_id(i - initial_clusters + 1);  // Use R hclust 1-indexed convention for Id's
+		}
+
+		
+	}
+
 } // end of Rclustercpp namespace
 
 #endif
