@@ -1,5 +1,5 @@
 Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidean", p=2) {
-	METHODS <- c("ward", "average", "single")
+	METHODS <- c("ward", "average", "single", "complete")
 	method  <- pmatch(method, METHODS)
 	if (is.na(method))
 		stop("Invalid clustering method")

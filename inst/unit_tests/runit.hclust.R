@@ -97,3 +97,12 @@ test.hclust.single.minkowski <- function()
 	compare.hclust(h, r)
 }
 
+test.hclust.complete.euclidean <- function()
+{
+	d <- USArrests
+	
+	h <- hclust(dist(d, method="euclidean"), method="complete")
+	r <- Rclusterpp.hclust(d, method="complete", distance="euclidean")
+	compare.hclust(h, r)
+}
+

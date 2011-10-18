@@ -14,6 +14,7 @@ namespace Rcpp {
 			case 1: return Rclusterpp::WARD;
 			case 2: return Rclusterpp::AVERAGE;
 			case 3: return Rclusterpp::SINGLE;
+			case 4: return Rclusterpp::COMPLETE;
 		}
 	}
 	
@@ -134,6 +135,17 @@ BEGIN_RCPP
 
 			return wrap(clusters);
 		}
+		case Rclusterpp::COMPLETE: {
+			typedef NumericCluster::obs cluster_type;
+
+			ClusterVector<cluster_type> clusters(data_e.rows());
+			init_clusters_from_rows(data_e, clusters);
+
+			cluster_via_rnn( complete_linkage<cluster_type>( stored_data_rows(data_e, dk, as<double>(minkowski)) ), clusters );
+
+			return wrap(clusters);
+		}
+
 	}
 	 
 END_RCPP

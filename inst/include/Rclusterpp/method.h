@@ -6,19 +6,20 @@
 namespace Rclusterpp {
 
 	
-	template<class Cluster>
+	template<class Cluster, class Distance=typename Cluster::distance_type>
 	struct DistanceFunctor {
-		typedef Cluster                         first_argument_type;
-		typedef Cluster                         second_argument_type;
-		typedef typename Cluster::distance_type result_type;
+		typedef Cluster  first_argument_type;
+		typedef Cluster  second_argument_type;
+		typedef Distance third_argument_type;
+		typedef Distance result_type;
 	};
 
 	template<class Cluster>
 	struct MergeFunctor {
-		typedef Cluster                         first_argument_type;
-		typedef Cluster                         second_argument_type;
-		typedef Cluster                         third_argument_type;
-		typedef void														result_type;
+		typedef Cluster first_argument_type;
+		typedef Cluster second_argument_type;
+		typedef Cluster third_argument_type;
+		typedef void		result_type;
 	};
 
 
@@ -81,18 +82,25 @@ namespace Rclusterpp {
 		// Link Adaptors
 		
 		template<class Cluster, class Distance>
-		class AverageLink : public DistanceFunctor<Cluster> {
+		class AverageLink : public DistanceFunctor<Cluster, typename Distance::result_type> {
 			public:
 				typedef typename AverageLink::result_type result_type;
 			
 				AverageLink(Distance d) : d_(d) {}
 			
-				result_type operator()(const Cluster& c1, const Cluster& c2) const {
+				result_type operator()(const Cluster& c1, const Cluster& c2, result_type m=std::numeric_limits<result_type>::max()) const {
+					if (m < std::numeric_limits<result_type>::max()) {
+						m *= (c1.size() * c2.size());  // Adjust threshold to account for averaging denominator
+					}
+					
 					result_type result = 0.;
 					typedef typename Cluster::idx_const_iterator iter;
 					for (iter i=c1.idxs_begin(), ie=c1.idxs_end(); i!=ie; ++i) {
 						for (iter j=c2.idxs_begin(), je=c2.idxs_end(); j!=je; ++j) {
 							result += d_(*i, *j);
+							if (result > m) {
+								return std::numeric_limits<result_type>::max();  // Return early if exceed threshold
+							}
 						}
 					}
 					return result / (c1.size() * c2.size());
@@ -102,10 +110,36 @@ namespace Rclusterpp {
 				Distance d_;
 		};
 
+		template<class Cluster, class Distance>
+		class CompleteLink : public DistanceFunctor<Cluster, typename Distance::result_type> {
+			public:
+				typedef typename CompleteLink::result_type result_type;
+			
+				CompleteLink(Distance d) : d_(d) {}
+			
+				result_type operator()(const Cluster& c1, const Cluster& c2, result_type m=std::numeric_limits<result_type>::max()) const {
+					result_type result = std::numeric_limits<result_type>::min();
+					typedef typename Cluster::idx_const_iterator iter;
+					for (iter i=c1.idxs_begin(), ie=c1.idxs_end(); i!=ie; ++i) {
+						for (iter j=c2.idxs_begin(), je=c2.idxs_end(); j!=je; ++j) {
+							result = std::max(result, d_(*i, *j));
+							if (result > m) {
+								return std::numeric_limits<result_type>::max();  // Return early if exceed threshold
+							}
+						}
+					}
+					return result;
+				}
+
+			private:
+				Distance d_;
+		};
+
+
 		template<class Cluster>
 		struct WardsLink : DistanceFunctor<Cluster> {
 			typedef typename Cluster::distance_type result_type;		
-			result_type operator()(const Cluster& c1, const Cluster& c2) const {
+			result_type operator()(const Cluster& c1, const Cluster& c2, result_type d=0.) const {
 				using namespace Eigen;
 				return squaredNorm( c1.center() - c2.center() ) * (c1.size() * c2.size()) / (c1.size() + c2.size()); 
 			}
@@ -188,6 +222,13 @@ namespace Rclusterpp {
 		); 
 	}
 		
+	template<class Cluster, class Distance>
+	LinkageMethod<Cluster, Methods::CompleteLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> > complete_linkage(Distance d) {
+		return LinkageMethod<Cluster, Methods::CompleteLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> >(
+			Methods::CompleteLink<Cluster, Distance>(d)
+		); 
+	}
+
 } // end of Rclusterpp namespace
 
 #endif

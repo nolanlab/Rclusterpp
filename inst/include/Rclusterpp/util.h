@@ -6,22 +6,24 @@ namespace Rclusterpp {
 	namespace Util {
 			
 		template<class OP>
-		class binder1st_P : public std::unary_function<typename OP::second_argument_type*, typename OP::result_type> {
+		class ClusterBinder : public std::binary_function<typename OP::second_argument_type*, typename OP::third_argument_type, typename OP::result_type> {
 		public:
-			binder1st_P(OP& o, typename OP::first_argument_type const* a1) : op(o), arg(a1) {}
-			typename OP::result_type operator()(const typename OP::second_argument_type* x) {
-				return op(*arg, *x);
+			ClusterBinder(OP& o, typename OP::first_argument_type const* a1) : op(o), arg(a1) {}
+			typename OP::result_type operator()(const typename OP::second_argument_type* x, const typename OP::third_argument_type& d) {
+				return op(*arg, *x, d);
 			}
 			
 		private:
 			OP& op;
-			typename OP::first_argument_type const* arg;
+			const typename OP::first_argument_type* arg;
 		};
 
 		template<class OP>
-		inline binder1st_P<OP> bind1st_P(OP& o, typename OP::first_argument_type const* a) { return binder1st_P<OP>(o,a); } 
+		inline ClusterBinder<OP> cluster_bind(OP& o, const typename OP::first_argument_type* a) { 
+			return ClusterBinder<OP>(o,a); 
+		} 
 	
-		} // end of Util namespace
+	} // end of Util namespace
 	
 } // end of Rclusterpp namespace
 

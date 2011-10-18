@@ -36,7 +36,7 @@ namespace Rclusterpp {
 			#pragma omp for nowait	
 #endif
 			for (ssize_t i=0; i<(last-first); i++) {
-				Dist_t dist = distancer(*(first+i));				
+				Dist_t dist = distancer(*(first+i), min_d_l);				
 				if (dist < min_d_l) {
 					min_i_l = first + i; 
 					min_d_l = dist;
@@ -95,7 +95,7 @@ namespace Rclusterpp {
 				nearn_type nn = nearest_neighbor(
 					next_unchained, 
 					clusters.end(), 
-					Util::bind1st_P(method.distancer, cluster_at_tip(chain)), // Bind tip into distance function for computing nearest neighbor 
+					Util::cluster_bind(method.distancer, cluster_at_tip(chain)), // Bind tip into distance function for computing nearest neighbor 
 					distance_to_tip(chain)
 				);
 				
@@ -113,7 +113,7 @@ namespace Rclusterpp {
 					chain.pop();
 
 					// Remove "tip" and "next tip"  from chain and merge into new cluster appended to "unchained" clusters
-					cluster_type* cn = new cluster_type(l, r, d);
+					cluster_type* cn = ClusterVector::make_cluster(l, r, d);
 					method.merger(*cn, *(cn->parent1()), *(cn->parent2()));
 					clusters.push_back(cn);
 				}
