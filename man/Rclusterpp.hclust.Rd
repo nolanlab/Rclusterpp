@@ -14,13 +14,13 @@ Rclusterpp.hclust(x, method = "ward", members = NULL, distance = "euclidean", p 
 A numeric data matrix, data frame or a dissimilarity structure as produced by \code{dist}.
 }
   \item{method}{
-The agglomeration method to be used. This must be one of "ward".
+The agglomeration method to be used. This must be one of "ward", "single", "complete" or "average".
 }
   \item{members}{
 \code{NULL} or a vector with length size of \code{x}. See \code{\link{hclust}}.
 }
   \item{distance}{
-The distance measure to be used. This must be one of "euclidiean".
+The distance measure to be used. This must be one of "euclidiean", "manhattan", "maximum", or "minkowski".
 }
   \item{p}{
 The power of the Minkowski distance.

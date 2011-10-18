@@ -7,8 +7,13 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
     stop("Ambiguous clustering method")
 
 	if (class(x) == "dist") {
+		suppressMessages(require("fastcluster")) # Attempt to use the faster clustering package
 		return(hclust(x, METHODS[method], members))
 	} else {
+		if (!is.null(members)) {
+			stop("members must be null when clustering from data")
+		}
+
 		DISTANCES <- c("euclidean", "manhattan", "maximum", "minkowski")
 		distance  <- pmatch(distance, DISTANCES)
 		if (is.na(distance))
