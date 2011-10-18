@@ -22,8 +22,10 @@ Maintainer: Michael D. Linderman <michael.d.linderman@gmail.com>
 }
 \references{
 Murtagh, F. (1983), "A survey of recent advances in hierarchical clustering algorithms", Computer Journal, 26, 354-359.
+Sibson, R. (1973), "SLINK: An optimally efficient algorithm for the single-link cluster method", Computer Journal, 16, 30-34.
 }
 \keyword{ package }
 \seealso{
 \code{\link[Rcpp:Rcpp-package]{Rcpp}}
+\code{\link[RcppEigen:RcppEigen-package]{RcppEigen}}
 }
