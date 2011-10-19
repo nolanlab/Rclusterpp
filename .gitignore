@@ -8,3 +8,4 @@ config.status
 *.so
 *.o
 inst/unit_tests/report*
+autom4te.cache
