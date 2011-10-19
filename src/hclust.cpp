@@ -8,6 +8,10 @@
 
 namespace Rcpp {
 
+	template <> Eigen::RowMajorNumericMatrix as(SEXP x) {
+		return Eigen::RowMajorNumericMatrix(as<Eigen::NumericMatrix>(x));
+	}
+
 	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible) {
 		switch (as<int>(x)) {
 			default: throw not_compatible("Linkage method invalid or not yet supported"); 
@@ -42,12 +46,17 @@ namespace Rcpp {
 } // Rcpp
 
 namespace Rclusterpp {
-	
+
+	template<class Matrix, class Clusters>
+	void init_clusters(const Matrix& matrix, Clusters& clusters) {
+		for (ssize_t i=0; i<matrix.rows(); i++) {
+			clusters[i] = Clusters::make_cluster(-(i+1), i);
+		}
+	}
 
 	template<class Matrix, class Clusters>
 	void init_clusters_from_rows(const Matrix& matrix, Clusters& clusters) {
 		for (ssize_t i=0; i<matrix.rows(); i++) {
-			// NOTE: There is no const 'row' for Rcpp::Matrix
 			clusters[i] = Clusters::make_cluster(-(i+1), i, matrix.row(i));
 		}
 	}
@@ -94,10 +103,7 @@ BEGIN_RCPP
 	using namespace Rcpp;
 	using namespace Rclusterpp;
 
-	NumericMatrix data_m(data);
-	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> data_e(
-		as<Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > >(data)
-	);
+	Eigen::RowMajorNumericMatrix data_e(as<Eigen::RowMajorNumericMatrix>(data));
 
 	LinkageKinds  lk = as<LinkageKinds>(link);
 	DistanceKinds dk = as<DistanceKinds>(dist);
@@ -147,6 +153,26 @@ BEGIN_RCPP
 		}
 
 	}
+	 
+END_RCPP
+}
+
+RcppExport SEXP hclust_from_distance(SEXP data, SEXP link) {
+BEGIN_RCPP
+	using namespace Rcpp;
+	using namespace Rclusterpp;
+
+	Eigen::TriangularView<Eigen::NumericMatrix, Eigen::StrictlyLower> data_e =
+		as<Eigen::NumericMatrix>(data).triangularView<Eigen::StrictlyLower>();
+	
+	typedef NumericCluster::plain cluster_type;
+
+	ClusterVector<cluster_type> clusters(data_e.rows());
+	init_clusters(data_e, clusters);
+
+	cluster_via_rnn( lancewilliams<cluster_type>( data_e, as<LinkageKinds>(link) ), clusters );
+
+	return wrap(clusters);
 	 
 END_RCPP
 }

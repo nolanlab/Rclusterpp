@@ -16,15 +16,17 @@ namespace Rclusterpp {
 	
 		public:
 
-			explicit Cluster(ssize_t id) : 
-				id_(id), size_(1), parent1_(NULL), parent2_(NULL), disimilarity_(0) {}
+			Cluster(ssize_t id, size_t idx) : 
+				id_(id), idx_(idx), size_(1), parent1_(NULL), parent2_(NULL), disimilarity_(0) {}
 			
 			Cluster(Derived const * parent1, Derived const * parent2, distance_type disimilarity) :
-				id_(NULLID()), size_(parent1->size()+parent2->size()), parent1_(parent1), parent2_(parent2), disimilarity_(disimilarity) {}
+				id_(NULLID()), idx_(parent1->idx()), size_(parent1->size()+parent2->size()), parent1_(parent1), parent2_(parent2), disimilarity_(disimilarity) {}
 							
 			ssize_t id() const { return id_; }
 			void set_id(ssize_t id) { id_ = id; } 
-			
+		
+			size_t idx() const { return idx_; }
+
 			size_t size() const { return size_; }
 
 			bool initial() const { return parent1_ == NULL || parent2_ == NULL; }
@@ -40,6 +42,7 @@ namespace Rclusterpp {
 		private:
 			
 			ssize_t id_;
+			size_t  idx_;
 			size_t  size_;
 	
 			Derived const * parent1_;
@@ -73,8 +76,10 @@ namespace Rclusterpp {
 			ClusterWithID(ClusterWithID const * parent1, ClusterWithID const * parent2, distance_type disimilarity) : 
 				base_class(parent1, parent2, disimilarity) {} 
 
+			ClusterWithID(ssize_t id, size_t obs_id) : base_class(id, obs_id) {}
+
 			template<class V>
-			ClusterWithID(ssize_t id, size_t obs_id, const V& v) : base_class(id) {}
+			ClusterWithID(ssize_t id, size_t obs_id, const V& v) : base_class(id, obs_id) {}
 			
 	};
 
@@ -96,7 +101,7 @@ namespace Rclusterpp {
 				base_class(parent1, parent2, disimilarity), center_() {} 
 
 			template<class V>
-			ClusterWithCenter(ssize_t id, size_t obs_id, const V& v) : base_class(id), center_(v) {}
+			ClusterWithCenter(ssize_t id, size_t obs_id, const V& v) : base_class(id, obs_id), center_(v) {}
 			
 			size_t dim() const { return center_.size(); }
 	
@@ -131,7 +136,7 @@ namespace Rclusterpp {
 
 			template<class V>
 			ClusterWithObs(ssize_t id, size_t obs_id, const V& vector) : 
-				base_class(id), idxs_(1, obs_id) {}
+				base_class(id, obs_id), idxs_(1, obs_id) {}
 	
 			const idx_type& idxs() const { return idxs_; }
 			idx_const_iterator idxs_begin() const { return idxs_.begin(); }
@@ -180,6 +185,10 @@ namespace Rclusterpp {
 			void push_back(const value_type& v) { clusters_.push_back(v); }
 
 			size_t initial_clusters() const { return initial_; }
+
+			static cluster_type* make_cluster(ssize_t id, size_t obs_id) {
+				return new cluster_type(id, obs_id);
+			}
 
 			template<class Vector>
 			static cluster_type* make_cluster(ssize_t id, size_t obs_id, const Vector& vector) {

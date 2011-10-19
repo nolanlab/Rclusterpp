@@ -2,7 +2,7 @@
 #define RCLUSTERPPEIGENSUGAR_H
 
 namespace Eigen {
-
+	
 	// These return types are copied from the Eigen classes
 
 	template<class T>

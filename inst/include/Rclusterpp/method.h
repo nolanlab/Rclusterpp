@@ -145,6 +145,26 @@ namespace Rclusterpp {
 			}
 		};
 
+		// Distance matrix
+		
+		template<class Cluster, class Matrix, class Distance=typename Matrix::Scalar>
+		class StoredDistance : public DistanceFunctor<Cluster, Distance> {
+			public:
+			
+				typedef typename StoredDistance::result_type result_type;
+			
+				StoredDistance(const Matrix& m) : distance(m) {}
+			
+				// TODO: Note current assuming strictly lower matrix, attempt to use template
+				// specialization to automatically select right approach
+				result_type operator()(const Cluster& c1, const Cluster& c2, result_type d=0.) const {	
+					return distance.coeff(std::max(c1.idx(), c2.idx()), std::min(c1.idx(), c2.idx()));
+				}
+
+			private:
+				const Matrix& distance;
+		};
+
 		// Merge 
 		// ----------------------------------------
 
@@ -221,13 +241,29 @@ namespace Rclusterpp {
 			Methods::AverageLink<Cluster, Distance>(d)
 		); 
 	}
-		
+
 	template<class Cluster, class Distance>
 	LinkageMethod<Cluster, Methods::CompleteLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> > complete_linkage(Distance d) {
 		return LinkageMethod<Cluster, Methods::CompleteLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> >(
 			Methods::CompleteLink<Cluster, Distance>(d)
 		); 
 	}
+
+	template<class Cluster, class Matrix>
+	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::NoOpMerge<Cluster> > lancewilliams(Matrix& m, LinkageKinds lk) {
+		switch (lk) {
+			default:
+				throw std::invalid_argument("Linkage method not yet supported");
+			case Rclusterpp::AVERAGE: {
+				throw std::invalid_argument("Linkage method not yet supported");
+				return LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::NoOpMerge<Cluster> >(
+					Methods::StoredDistance<Cluster, Matrix>(m)
+				);
+			}
+		}
+		
+	}
+
 
 } // end of Rclusterpp namespace
 
