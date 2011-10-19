@@ -26,6 +26,7 @@ namespace Rclusterpp {
 			void set_id(ssize_t id) { id_ = id; } 
 		
 			size_t idx() const { return idx_; }
+			size_t set_idx(size_t idx) { idx_ = idx; return idx; }
 
 			size_t size() const { return size_; }
 

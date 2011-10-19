@@ -183,6 +183,43 @@ namespace Rclusterpp {
 			}
 		};
 
+		template<class Cluster, class Matrix>
+		class LanceWilliamsMerge : MergeFunctor<Cluster> {
+			public:
+				typedef typename Matrix::Scalar distance_type;
+				
+				LanceWilliamsMerge(Matrix& m) : distance(m) {}
+
+				// TODO: Note current assuming strictly lower matrix, attempt to use template
+				// specialization to automatically select right approach
+				void operator()(Cluster& co, const Cluster& c1, const Cluster& c2) const {
+					const Cluster& ca = (c1.idx() < c2.idx()) ? c1 : c2;  // Determine larger/smaller idx so we 
+					const Cluster& cb = (c1.idx() > c2.idx()) ? c1 : c2;  // can stay within triangular portion
+
+					size_t ai = ca.idx(), bi = cb.idx(), oi = co.set_idx(ai);  
+
+					// Coefficients
+					distance_type aA = (distance_type)ca.size() / co.size();
+					distance_type aB = (distance_type)cb.size() / co.size();
+
+					for (size_t i=0; i<ai; i++) {  // Recall ai == oi && ai < bi
+						distance.coeffRef(oi, i) = aA * distance.coeff(ai, i) + aB * distance.coeff(bi, i);
+					}
+					for (size_t i=ai+1; i<bi; i++) {
+						distance.coeffRef(i, oi) = aA * distance.coeff(i, ai) + aB * distance.coeff(bi, i);
+					}
+					for (size_t i=bi+1; i<(size_t)distance.rows(); i++) {
+						distance.coeffRef(i, oi) = aA * distance.coeff(i, ai) + aB * distance.coeff(i, bi);
+					}
+					
+					return;
+				}
+
+			private:
+				Matrix& distance;
+		};
+
+
 	} // end of Methods namespace
 
 
@@ -250,15 +287,13 @@ namespace Rclusterpp {
 	}
 
 	template<class Cluster, class Matrix>
-	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::NoOpMerge<Cluster> > lancewilliams(Matrix& m, LinkageKinds lk) {
+	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix> > lancewilliams(Matrix& m, LinkageKinds lk) {
+		typedef LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix> > method_type;
 		switch (lk) {
 			default:
 				throw std::invalid_argument("Linkage method not yet supported");
 			case Rclusterpp::AVERAGE: {
-				throw std::invalid_argument("Linkage method not yet supported");
-				return LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::NoOpMerge<Cluster> >(
-					Methods::StoredDistance<Cluster, Matrix>(m)
-				);
+				return method_type( Methods::StoredDistance<Cluster, Matrix>(m), Methods::LanceWilliamsMerge<Cluster, Matrix>(m) );
 			}
 		}
 		

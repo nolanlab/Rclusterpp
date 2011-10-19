@@ -7,8 +7,22 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
     stop("Ambiguous clustering method")
 
 	if (class(x) == "dist") {
-		suppressMessages(require("fastcluster")) # Attempt to use the faster clustering package
-		return(hclust(x, METHODS[method], members))
+		dist.method = attributes(x)$method
+		labels      = attributes(x)$Labels
+
+		N <- nrow(x <- as.matrix(x))
+		hcl <- .Call("hclust_from_distance", 
+								 data = x,
+								 link = as.integer(method), 
+								 DUP = FALSE, NAOK = FALSE, PACKAGE = "Rclusterpp" )
+	
+		hcl$labels      = labels 
+		hcl$method      = METHODS[method]
+		hcl$call        = match.call()
+		hcl$dist.method = dist.method 
+		class(hcl) <- "hclust"
+	
+		return(hcl)
 	} else {
 		if (!is.null(members)) {
 			stop("members must be null when clustering from data")
