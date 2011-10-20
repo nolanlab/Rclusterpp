@@ -10,9 +10,9 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
 		dist.method = attributes(x)$method
 		labels      = attributes(x)$Labels
 
-		N <- nrow(x <- as.matrix(x))
 		hcl <- .Call("hclust_from_distance", 
-								 data = x,
+								 data = as.double(x),
+								 size = as.integer(attributes(x)$Size),
 								 link = as.integer(method), 
 								 DUP = FALSE, NAOK = FALSE, PACKAGE = "Rclusterpp" )
 	

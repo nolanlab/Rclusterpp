@@ -190,7 +190,7 @@ namespace Rclusterpp {
 				
 				LanceWilliamsMerge(Matrix& m) : distance(m) {}
 
-				// TODO: Note current assuming strictly lower matrix, attempt to use template
+				// TODO: Note currently assuming strictly lower matrix, attempt to use template
 				// specialization to automatically select right approach
 				void operator()(Cluster& co, const Cluster& c1, const Cluster& c2) const {
 					const Cluster& ca = (c1.idx() < c2.idx()) ? c1 : c2;  // Determine larger/smaller idx so we 

@@ -9,7 +9,7 @@
 namespace Rcpp {
 
 	template <> Eigen::RowMajorNumericMatrix as(SEXP x) {
-		return Eigen::RowMajorNumericMatrix(as<Eigen::NumericMatrix>(x));
+		return Eigen::RowMajorNumericMatrix(as<Eigen::MapNumericMatrix>(x));
 	}
 
 	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible) {
@@ -42,7 +42,7 @@ namespace Rcpp {
 		Rclusterpp::populate_Rhclust(clusters, hclust);
 		return Rcpp::wrap(hclust);
 	}
-
+	
 } // Rcpp
 
 namespace Rclusterpp {
@@ -157,22 +157,45 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP hclust_from_distance(SEXP data, SEXP link) {
+namespace {
+
+	template<class Matrix>
+	void populate_strictly_lower(Matrix& m, SEXP data) {
+		ssize_t N = m.rows();
+
+		const int RTYPE = ::Rcpp::traits::r_sexptype_traits<Eigen::NumericMatrix::Scalar>::rtype; 
+		if (TYPEOF(data) != RTYPE)
+			throw std::invalid_argument("Wrong R type for mapped vector");
+		
+		typedef ::Rcpp::traits::storage_type<RTYPE>::type STORAGE;
+		double *d_start = ::Rcpp::internal::r_vector_start<RTYPE,STORAGE>(data);
+
+		for (ssize_t c=0; c<N-1; c++) {
+			m.block(c+1 /* starting row */, c, N-(c+1) /* numer of rows*/, 1) = Eigen::Map<Eigen::NumericMatrix>(d_start,N-(c+1),1);
+			d_start += N-(c+1);
+		}
+	}
+	
+}
+
+RcppExport SEXP hclust_from_distance(SEXP data, SEXP size, SEXP link) {
 BEGIN_RCPP
 	using namespace Rcpp;
 	using namespace Rclusterpp;
 
-	Eigen::TriangularView<Eigen::NumericMatrix, Eigen::StrictlyLower> data_e =
-		as<Eigen::NumericMatrix>(data).triangularView<Eigen::StrictlyLower>();
+	ssize_t N = as<ssize_t>(size);	
+	Eigen::NumericMatrix data_e(N, N);
 	
+	populate_strictly_lower(data_e, data);  // Populate strictly lower distance matrix from packed vector
+	Eigen::StrictlyLowerNumericMatrix data_t = data_e.triangularView<Eigen::StrictlyLower>(); 
+			
 	typedef NumericCluster::plain cluster_type;
 
-	ClusterVector<cluster_type> clusters(data_e.rows());
-	init_clusters(data_e, clusters);
+	ClusterVector<cluster_type> clusters(data_t.rows());
+	init_clusters(data_t, clusters);
 
-	cluster_via_rnn( lancewilliams<cluster_type>( data_e, as<LinkageKinds>(link) ), clusters );
+	cluster_via_rnn( lancewilliams<cluster_type>( data_t, as<LinkageKinds>(link) ), clusters );
 
 	return wrap(clusters);
-	 
 END_RCPP
 }

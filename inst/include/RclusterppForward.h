@@ -31,20 +31,21 @@ namespace Eigen {
 
 	// Convenience types for working with Eigen matrices
 
-	typedef Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >      NumericMatrix;
-	typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>  RowMajorNumericMatrix;
+	typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>                         NumericMatrix;
+	typedef Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >            MapNumericMatrix;
+	typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>        RowMajorNumericMatrix;
+	typedef Eigen::TriangularView<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>,Eigen::StrictlyLower> StrictlyLowerNumericMatrix;
 
 }
 
 namespace Rcpp {
 	
 	template <> Eigen::RowMajorNumericMatrix as(SEXP x); 
-
+	
 	// These functions map indices provided by R-bindings to linkage and distance
 	// methods. The relationship between the index and the method needs to be kept'
 	// in sync with the R-bindings.
 	
-
 	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible);	
 	template <> Rclusterpp::DistanceKinds as(SEXP x) throw(not_compatible);
 
