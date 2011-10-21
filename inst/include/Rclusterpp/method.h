@@ -184,12 +184,32 @@ namespace Rclusterpp {
 			}
 		};
 
-		template<class Cluster, class Matrix>
+
+		template<class Cluster, class Distance>
+		struct AverageUpdate {
+			Distance alpha(const Cluster& ci, const Cluster& co) const { return (Distance)ci.size() / co.size(); }
+			Distance gamma() const { return 0.; }
+		};
+
+		template<class Cluster, class Distance>
+		struct SingleUpdate {
+			Distance alpha(const Cluster& ci, const Cluster& co) const { return 0.5; }
+			Distance gamma() const { return -0.5; }
+		};
+
+		template<class Cluster, class Distance>
+		struct CompleteUpdate {
+			Distance alpha(const Cluster& ci, const Cluster& co) const { return 0.5; }
+			Distance gamma() const { return 0.5; }
+		};
+
+
+		template<class Cluster, class Matrix, class Update>
 		class LanceWilliamsMerge : MergeFunctor<Cluster> {
 			public:
 				typedef typename Matrix::Scalar distance_type;
 				
-				LanceWilliamsMerge(Matrix& m) : distance(m) {}
+				LanceWilliamsMerge(Matrix& m, const Update& u) : distance(m), update(u) {}
 
 				// TODO: Note currently assuming strictly lower matrix, attempt to use template
 				// specialization to automatically select right approach
@@ -200,18 +220,19 @@ namespace Rclusterpp {
 					size_t ai = ca.idx(), bi = cb.idx(), oi = co.idx();  // Output will be lesser of two merged idxs  
 
 					// Coefficients
-					distance_type aA = (distance_type)ca.size() / co.size();
-					distance_type aB = (distance_type)cb.size() / co.size();
+					distance_type aA = update.alpha(ca, co);
+					distance_type aB = update.alpha(cb, co); 
+					distance_type gm = update.gamma();
 
 					size_t i=valids.begin();
 					for (; i<ai; i=valids.succ(i)) {  // Recall ai == oi && ai < bi
-						distance.coeffRef(oi, i) = aA * distance.coeff(ai, i) + aB * distance.coeff(bi, i);
+						distance.coeffRef(oi, i) = aA * distance.coeff(ai, i) + aB * distance.coeff(bi, i) + gm * std::abs(distance.coeff(ai, i) - distance.coeff(bi, i));
 					}
 					for (; i<bi; i=valids.succ(i)) {
-						distance.coeffRef(i, oi) = aA * distance.coeff(i, ai) + aB * distance.coeff(bi, i);
+						distance.coeffRef(i, oi) = aA * distance.coeff(i, ai) + aB * distance.coeff(bi, i) + gm * std::abs(distance.coeff(i, ai) - distance.coeff(bi, i));
 					}
 					for (; i<valids.end(); i=valids.succ(i)) {
-						distance.coeffRef(i, oi) = aA * distance.coeff(i, ai) + aB * distance.coeff(i, bi);
+						distance.coeffRef(i, oi) = aA * distance.coeff(i, ai) + aB * distance.coeff(i, bi) + gm * std::abs(distance.coeff(i, ai) - distance.coeff(i, bi));
 					}
 					
 					return;
@@ -219,9 +240,9 @@ namespace Rclusterpp {
 
 			private:
 				Matrix& distance;
+				Update update;
 		};
-
-
+		
 	} // end of Methods namespace
 
 
@@ -288,19 +309,30 @@ namespace Rclusterpp {
 		); 
 	}
 
-	template<class Cluster, class Matrix>
-	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix> > lancewilliams(Matrix& m, LinkageKinds lk) {
-		typedef LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix> > method_type;
-		switch (lk) {
-			default:
-				throw std::invalid_argument("Linkage method not yet supported");
-			case Rclusterpp::AVERAGE: {
-				return method_type( Methods::StoredDistance<Cluster, Matrix>(m), Methods::LanceWilliamsMerge<Cluster, Matrix>(m) );
-			}
-		}
-		
+
+	template<class Cluster, class Matrix, class Update>
+	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Update> > lancewilliams(Matrix& m, const Update& u) {
+		typedef LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Update> > method_type;
+		return method_type(Methods::StoredDistance<Cluster, Matrix>(m), Methods::LanceWilliamsMerge<Cluster, Matrix, Update>(m, u) );		
 	}
 
+	template<class Cluster, class Matrix>
+	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::AverageUpdate<Cluster,typename Matrix::Scalar> > >
+	lancewilliams_average(Matrix& m) {
+		return lancewilliams<Cluster>(m, Methods::AverageUpdate<Cluster,typename Matrix::Scalar>());
+	}
+
+	template<class Cluster, class Matrix>
+	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::SingleUpdate<Cluster,typename Matrix::Scalar> > >
+	lancewilliams_single(Matrix& m) {
+		return lancewilliams<Cluster>(m, Methods::SingleUpdate<Cluster,typename Matrix::Scalar>());
+	}
+
+	template<class Cluster, class Matrix>
+	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::CompleteUpdate<Cluster,typename Matrix::Scalar> > >
+	lancewilliams_complete(Matrix& m) {
+		return lancewilliams<Cluster>(m, Methods::CompleteUpdate<Cluster,typename Matrix::Scalar>());
+	}
 
 } // end of Rclusterpp namespace
 

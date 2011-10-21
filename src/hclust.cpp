@@ -194,7 +194,20 @@ BEGIN_RCPP
 	ClusterVector<cluster_type> clusters(data_t.rows());
 	init_clusters(data_t, clusters);
 
-	cluster_via_rnn( lancewilliams<cluster_type>( data_t, as<LinkageKinds>(link) ), clusters );
+	LinkageKinds  lk = as<LinkageKinds>(link);
+	switch (lk) {
+	default:
+		throw std::invalid_argument("Linkage or distance method not yet supported");
+	case Rclusterpp::AVERAGE:
+		cluster_via_rnn( lancewilliams_average<cluster_type>(data_t), clusters );
+		break;
+	case Rclusterpp::SINGLE:
+		cluster_via_rnn( lancewilliams_single<cluster_type>(data_t),  clusters );
+		break;
+	case Rclusterpp::COMPLETE:
+		cluster_via_rnn( lancewilliams_complete<cluster_type>(data_t), clusters );
+		break;
+	}
 
 	return wrap(clusters);
 END_RCPP

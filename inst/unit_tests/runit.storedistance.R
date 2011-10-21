@@ -15,3 +15,16 @@ test.storedistance.average.manhattan <- function() {
 	r <- Rclusterpp.hclust(dist(USArrests, method="manhattan"), method="average")
 	compare.hclust(h, r)
 }
+
+test.storedistance.single.euclidean <- function() {
+	h <- hclust(dist(USArrests, method="euclidean"), method="single")
+	r <- Rclusterpp.hclust(dist(USArrests, method="euclidean"), method="single")
+	compare.hclust(h, r)
+}
+
+test.storedistance.complete.euclidean <- function() {
+	h <- hclust(dist(USArrests, method="euclidean"), method="complete")
+	r <- Rclusterpp.hclust(dist(USArrests, method="euclidean"), method="complete")
+	compare.hclust(h, r)
+}
+
