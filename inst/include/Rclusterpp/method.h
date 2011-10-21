@@ -16,10 +16,11 @@ namespace Rclusterpp {
 
 	template<class Cluster>
 	struct MergeFunctor {
-		typedef Cluster first_argument_type;
-		typedef Cluster second_argument_type;
-		typedef Cluster third_argument_type;
-		typedef void		result_type;
+		typedef Cluster         first_argument_type;
+		typedef Cluster         second_argument_type;
+		typedef Cluster         third_argument_type;
+		typedef Util::IndexList fourth_argument_type;
+		typedef void		  result_type;
 	};
 
 
@@ -170,7 +171,7 @@ namespace Rclusterpp {
 
 		template<class Cluster>
 		struct NoOpMerge : public MergeFunctor<Cluster> {
-			void operator()(Cluster& co, const Cluster& c1, const Cluster& c2) const {
+			void operator()(Cluster&, const Cluster&, const Cluster& c2, const Util::IndexList&) const {
 				// Noop
 				return;
 			}
@@ -178,7 +179,7 @@ namespace Rclusterpp {
 
 		template<class Cluster>
 		struct WardsMerge : MergeFunctor<Cluster> {									
-			void operator()(Cluster& co, const Cluster& c1, const Cluster& c2) const {
+			void operator()(Cluster& co, const Cluster& c1, const Cluster& c2, const Util::IndexList&) const {
 				co.set_center( ((c1.center() * c1.size()) + (c2.center() * c2.size())) / co.size() );
 			}
 		};
@@ -192,23 +193,24 @@ namespace Rclusterpp {
 
 				// TODO: Note currently assuming strictly lower matrix, attempt to use template
 				// specialization to automatically select right approach
-				void operator()(Cluster& co, const Cluster& c1, const Cluster& c2) const {
+				void operator()(Cluster& co, const Cluster& c1, const Cluster& c2, const Util::IndexList& valids) const {
 					const Cluster& ca = (c1.idx() < c2.idx()) ? c1 : c2;  // Determine larger/smaller idx so we 
 					const Cluster& cb = (c1.idx() > c2.idx()) ? c1 : c2;  // can stay within triangular portion
 
-					size_t ai = ca.idx(), bi = cb.idx(), oi = co.set_idx(ai);  
+					size_t ai = ca.idx(), bi = cb.idx(), oi = co.idx();  // Output will be lesser of two merged idxs  
 
 					// Coefficients
 					distance_type aA = (distance_type)ca.size() / co.size();
 					distance_type aB = (distance_type)cb.size() / co.size();
 
-					for (size_t i=0; i<ai; i++) {  // Recall ai == oi && ai < bi
+					size_t i=valids.begin();
+					for (; i<ai; i=valids.succ(i)) {  // Recall ai == oi && ai < bi
 						distance.coeffRef(oi, i) = aA * distance.coeff(ai, i) + aB * distance.coeff(bi, i);
 					}
-					for (size_t i=ai+1; i<bi; i++) {
+					for (; i<bi; i=valids.succ(i)) {
 						distance.coeffRef(i, oi) = aA * distance.coeff(i, ai) + aB * distance.coeff(bi, i);
 					}
-					for (size_t i=bi+1; i<(size_t)distance.rows(); i++) {
+					for (; i<valids.end(); i=valids.succ(i)) {
 						distance.coeffRef(i, oi) = aA * distance.coeff(i, ai) + aB * distance.coeff(i, bi);
 					}
 					

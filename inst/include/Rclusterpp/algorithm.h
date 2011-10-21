@@ -77,12 +77,14 @@ namespace Rclusterpp {
 
 #define cluster_at_tip(x) (x).top().first
 #define distance_to_tip(x) (x).top().second
-
-						
+								
 		// Expand the size of clusters vector to the contain exactly the newly created clusters	
 		size_t initial_clusters = clusters.size(), result_clusters = (initial_clusters * 2) - 1;
 		clusters.reserve(result_clusters);
 		
+		// List of valid clusters (used in mer
+		Util::IndexList valid(initial_clusters);
+
 		typename clusters_type::iterator next_unchained = clusters.begin();
 		while (clusters.size() != result_clusters) {
 			if (chain.empty()) {
@@ -113,8 +115,11 @@ namespace Rclusterpp {
 					chain.pop();
 
 					// Remove "tip" and "next tip"  from chain and merge into new cluster appended to "unchained" clusters
-					cluster_type* cn = ClusterVector::make_cluster(l, r, d);
-					method.merger(*cn, *(cn->parent1()), *(cn->parent2()));
+					cluster_type* cn = ClusterVector::make_cluster(std::min(l->idx(), r->idx()), l, r, d);
+					
+					valid.remove(std::max(r->idx(), l->idx()));
+					method.merger(*cn, *(cn->parent1()), *(cn->parent2()), valid);
+					
 					clusters.push_back(cn);
 				}
 			}
@@ -212,7 +217,7 @@ namespace Rclusterpp {
 		}
 		for (size_t i=0; i<(initial_clusters-1); i++) {
 			size_t f = from(merges[i]), t = into(merges[i]);
-			clusters.push_back(ClusterVector::make_cluster( clusters[P[f]], clusters[P[t]], L[f] ));
+			clusters.push_back(ClusterVector::make_cluster( 0, clusters[P[f]], clusters[P[t]], L[f] ));
 			P[t] = i + initial_clusters;
 		}
 		

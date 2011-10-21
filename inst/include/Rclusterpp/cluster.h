@@ -19,8 +19,8 @@ namespace Rclusterpp {
 			Cluster(ssize_t id, size_t idx) : 
 				id_(id), idx_(idx), size_(1), parent1_(NULL), parent2_(NULL), disimilarity_(0) {}
 			
-			Cluster(Derived const * parent1, Derived const * parent2, distance_type disimilarity) :
-				id_(NULLID()), idx_(parent1->idx()), size_(parent1->size()+parent2->size()), parent1_(parent1), parent2_(parent2), disimilarity_(disimilarity) {}
+			Cluster(size_t idx, Derived const * parent1, Derived const * parent2, distance_type disimilarity) :
+				id_(NULLID()), idx_(idx), size_(parent1->size()+parent2->size()), parent1_(parent1), parent2_(parent2), disimilarity_(disimilarity) {}
 							
 			ssize_t id() const { return id_; }
 			void set_id(ssize_t id) { id_ = id; } 
@@ -74,8 +74,8 @@ namespace Rclusterpp {
 			
 		public:	
 			
-			ClusterWithID(ClusterWithID const * parent1, ClusterWithID const * parent2, distance_type disimilarity) : 
-				base_class(parent1, parent2, disimilarity) {} 
+			ClusterWithID(size_t idx, ClusterWithID const * parent1, ClusterWithID const * parent2, distance_type disimilarity) : 
+				base_class(idx, parent1, parent2, disimilarity) {} 
 
 			ClusterWithID(ssize_t id, size_t obs_id) : base_class(id, obs_id) {}
 
@@ -98,8 +98,8 @@ namespace Rclusterpp {
 			
 		public:	
 			
-			ClusterWithCenter(ClusterWithCenter const * parent1, ClusterWithCenter const * parent2, distance_type disimilarity) : 
-				base_class(parent1, parent2, disimilarity), center_() {} 
+			ClusterWithCenter(size_t idx, ClusterWithCenter const * parent1, ClusterWithCenter const * parent2, distance_type disimilarity) : 
+				base_class(idx, parent1, parent2, disimilarity), center_() {} 
 
 			template<class V>
 			ClusterWithCenter(ssize_t id, size_t obs_id, const V& v) : base_class(id, obs_id), center_(v) {}
@@ -128,8 +128,8 @@ namespace Rclusterpp {
 
 		public:
 
-			ClusterWithObs(ClusterWithObs const * parent1, ClusterWithObs const * parent2, distance_type disimilarity) : 
-				base_class(parent1, parent2, disimilarity), idxs_(parent1->idxs()) {
+			ClusterWithObs(size_t idx, ClusterWithObs const * parent1, ClusterWithObs const * parent2, distance_type disimilarity) : 
+				base_class(idx, parent1, parent2, disimilarity), idxs_(parent1->idxs()) {
 				
 				// Append "merged" observation idxs	
 				idxs_.insert(idxs_.end(), parent2->idxs_begin(), parent2->idxs_end());
@@ -196,8 +196,8 @@ namespace Rclusterpp {
 				return new cluster_type(id, obs_id, vector);
 			}
 
-			static cluster_type* make_cluster(cluster_type const * parent1, cluster_type const * parent2, distance_type disimilarity) {
-				return new cluster_type(parent1, parent2, disimilarity);
+			static cluster_type* make_cluster(size_t idx, cluster_type const * parent1, cluster_type const * parent2, distance_type disimilarity) {
+				return new cluster_type(idx, parent1, parent2, disimilarity);
 			}
 
 
