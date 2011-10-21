@@ -318,19 +318,19 @@ namespace Rclusterpp {
 
 	template<class Cluster, class Matrix>
 	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::AverageUpdate<Cluster,typename Matrix::Scalar> > >
-	lancewilliams_average(Matrix& m) {
+	average_link(Matrix& m, FromDistanceKinds) {
 		return lancewilliams<Cluster>(m, Methods::AverageUpdate<Cluster,typename Matrix::Scalar>());
 	}
 
 	template<class Cluster, class Matrix>
 	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::SingleUpdate<Cluster,typename Matrix::Scalar> > >
-	lancewilliams_single(Matrix& m) {
+	single_link(Matrix& m, FromDistanceKinds) {
 		return lancewilliams<Cluster>(m, Methods::SingleUpdate<Cluster,typename Matrix::Scalar>());
 	}
 
 	template<class Cluster, class Matrix>
 	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::CompleteUpdate<Cluster,typename Matrix::Scalar> > >
-	lancewilliams_complete(Matrix& m) {
+	complete_link(Matrix& m, FromDistanceKinds) {
 		return lancewilliams<Cluster>(m, Methods::CompleteUpdate<Cluster,typename Matrix::Scalar>());
 	}
 

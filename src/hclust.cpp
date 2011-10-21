@@ -199,13 +199,13 @@ BEGIN_RCPP
 	default:
 		throw std::invalid_argument("Linkage or distance method not yet supported");
 	case Rclusterpp::AVERAGE:
-		cluster_via_rnn( lancewilliams_average<cluster_type>(data_t), clusters );
+		cluster_via_rnn( average_link<cluster_type>(data_t, FromDistance), clusters );
 		break;
 	case Rclusterpp::SINGLE:
-		cluster_via_rnn( lancewilliams_single<cluster_type>(data_t),  clusters );
+		cluster_via_rnn( single_link<cluster_type>(data_t, FromDistance),  clusters );
 		break;
 	case Rclusterpp::COMPLETE:
-		cluster_via_rnn( lancewilliams_complete<cluster_type>(data_t), clusters );
+		cluster_via_rnn( complete_link<cluster_type>(data_t, FromDistance), clusters );
 		break;
 	}
 

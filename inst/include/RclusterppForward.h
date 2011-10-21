@@ -17,6 +17,9 @@ namespace Rclusterpp {
 		MINKOWSKI
 	};
 
+	enum FromDistanceKinds {
+		FromDistance
+	};
 
 	// Forward declarations of internal data structures that can
 	// be converted to R objects via Rcpp wrap functions
