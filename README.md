@@ -10,4 +10,13 @@ Rclusterpp makes extensive use of
 the [Eigen](http://eigen.tuxfamily.org) matrix library (via
 [RcppEigen](http://cran.r-project.org/web/packages/RcppEigen/index.html)).
 Rclusterpp provides a R interface to its internal libraries that can be used in
-place of `stats::hclust` and provides linkable libraries for use by downstream packages. 
+place of `stats::hclust` and provides linkable libraries for use by downstream packages.
+
+Explore the unit tests `inst/unit_tests` and examples directory `inst/examples`
+for examples on how to use Rclusterpp directly within R, or as a linkable	library 
+for use with other native code. Note that some of the examples
+require the [inline](http://cran.r-project.org/web/packages/inline/index.html) package.
+
+Rclusterpp uses OpenMP internally for concurrent execution. By default, as many
+threads as processors are created. To control the number of threads set the
+`OMP_NUM_THREADS` environment variable.
