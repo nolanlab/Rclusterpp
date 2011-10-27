@@ -1,2 +1,5 @@
 useDynLib(Rclusterpp)
-export("Rclusterpp.hclust")
+export(
+	"Rclusterpp.hclust",
+	"Rclusterpp.package.skeleton"	
+)
