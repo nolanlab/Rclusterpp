@@ -31,7 +31,11 @@ namespace Rcpp {
 			case 4: return Rclusterpp::MINKOWSKI;
 		}
 	}
-	
+
+	template <> SEXP wrap( const Rclusterpp::Hclust& hclust ) {
+		return List::create( _["merge"] = hclust.merge, _["height"] = hclust.height, _["order"] = hclust.order ); 
+	}
+
 } // Rcpp
 
 

@@ -79,10 +79,8 @@ namespace Rclusterpp {
 } // end of Rclusterpp namespace
 
 namespace Rcpp {
-	template <> SEXP wrap( const Rclusterpp::Hclust& hclust ) {
-		return List::create( _["merge"] = hclust.merge, _["height"] = hclust.height, _["order"] = hclust.order ); 
-	}
-	
+	template <> SEXP wrap( const Rclusterpp::Hclust& hclust );
+
 	template <typename T> SEXP wrap( const Rclusterpp::ClusterVector<T>& clusters ) {
 		Rclusterpp::Hclust hclust(clusters.initial_clusters());
 		Rclusterpp::populate_Rhclust(clusters, hclust);
