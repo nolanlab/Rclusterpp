@@ -38,6 +38,31 @@ namespace Rcpp {
 
 } // Rcpp
 
+RcppExport SEXP linkage_kinds() {
+BEGIN_RCPP
+	// This ordering matches the 'case' statement above in the 'as' function 
+	Rcpp::CharacterVector lk(4);
+	lk[0] = "ward";
+	lk[1] = "average";
+	lk[2] = "single";
+	lk[3] = "complete";
+	return Rcpp::wrap(lk);
+END_RCPP
+}
+
+RcppExport SEXP distance_kinds() {
+BEGIN_RCPP
+	// This ordering matches the 'case' statement above in the 'as' function 
+	Rcpp::CharacterVector lk(4);
+	lk[0] = "euclidean";
+	lk[1] = "manhattan";
+	lk[2] = "maximum";
+	lk[3] = "minkowski";
+	return Rcpp::wrap(lk);
+END_RCPP
+}
+
+
 
 RcppExport SEXP hclust_from_data(SEXP data, SEXP link, SEXP dist, SEXP minkowski) {
 BEGIN_RCPP

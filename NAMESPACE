@@ -1,5 +1,7 @@
 useDynLib(Rclusterpp)
 export(
 	"Rclusterpp.hclust",
-	"Rclusterpp.package.skeleton"	
+	"Rclusterpp.package.skeleton",
+	"Rclusterpp.linkage_kinds",
+	"Rclusterpp.distance_kinds"
 )

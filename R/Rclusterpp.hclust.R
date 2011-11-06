@@ -1,5 +1,13 @@
+Rclusterpp.linkage_kinds <- function() {
+	.Call("linkage_kinds", PACKAGE="Rclusterpp")
+}
+
+Rclusterpp.distance_kinds <- function() {
+	.Call("distance_kinds", PACKAGE="Rclusterpp")
+}
+
 Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidean", p=2) {
-	METHODS <- c("ward", "average", "single", "complete")
+	METHODS <- Rclusterpp.linkage_kinds()
 	method  <- pmatch(method, METHODS)
 	if (is.na(method))
 		stop("Invalid clustering method")
@@ -28,7 +36,7 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
 			stop("members must be null when clustering from data")
 		}
 
-		DISTANCES <- c("euclidean", "manhattan", "maximum", "minkowski")
+		DISTANCES <- Rclusterpp.distance_kinds()
 		distance  <- pmatch(distance, DISTANCES)
 		if (is.na(distance))
 			stop("Invalid distance metric")

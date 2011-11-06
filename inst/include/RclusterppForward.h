@@ -34,10 +34,10 @@ namespace Eigen {
 
 	// Convenience types for working with Eigen matrices
 
-	typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>                         NumericMatrix;
-	typedef Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >            MapNumericMatrix;
-	typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>        RowMajorNumericMatrix;
-	typedef Eigen::TriangularView<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>,Eigen::StrictlyLower> StrictlyLowerNumericMatrix;
+	typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>                  NumericMatrix;
+	typedef Eigen::Map<NumericMatrix>                                              MapNumericMatrix;
+	typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RowMajorNumericMatrix;
+	typedef Eigen::TriangularView<NumericMatrix,Eigen::StrictlyLower>              StrictlyLowerNumericMatrix;
 
 }
 
