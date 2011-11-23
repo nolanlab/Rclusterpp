@@ -56,6 +56,15 @@ namespace Rclusterpp {
 		std::transform(first, last, hclust.merge.column(1).begin(), std::mem_fun(&cluster_type::parent2Id));
 		std::transform(first, last, hclust.height.begin(), std::mem_fun(&cluster_type::disimilarity));
 
+		// Swap merge entries if needed to match 'stock' hclust output
+		for (int i=0; i<hclust.merge.rows(); i++) {
+			int iia = std::max(hclust.merge(i, 0), hclust.merge(i, 1)), iib = std::min(hclust.merge(i, 0), hclust.merge(i, 1));
+			if (iia > 0 || iib > 0)
+				std::swap(iia, iib);
+			hclust.merge(i,0) = iia;
+			hclust.merge(i,1) = iib;
+		}
+
 		// Compute order that minimizes dendrogram crossings by performing DFS traversal of tree
 		if (first != last) {
 			size_t idx = 0;
@@ -69,8 +78,18 @@ namespace Rclusterpp {
 				if (top->initial()) {
 					(hclust.order)[idx++] = -(top->id());  // Recall we use negative IDs for inital clusters 
 				} else {
-					stack.push(top->parent2());
-					stack.push(top->parent1());
+					// Adjust recurse ordering to march order output of 'stock' hclust. Swapping approach based on implementation
+					// of hcass2 in R stats package.
+					ssize_t iia = std::max(top->parent1Id(), top->parent2Id()), iib = std::min(top->parent1Id(), top->parent2Id());
+					if (iia > 0 || iib > 0)
+						std::swap(iia, iib);
+					if (iia != top->parent1Id()) {
+						stack.push(top->parent1());
+						stack.push(top->parent2());
+					} else {
+						stack.push(top->parent2());
+						stack.push(top->parent1());
+					}
 				}
 			}
 		}

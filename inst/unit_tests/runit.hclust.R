@@ -7,9 +7,10 @@ if(FALSE) {
 }
 
 compare.hclust <- function(h1, h2) {
-	checkTrue(all(h1$merge == h2$merge | h1$merge == h2$merge[,c(2,1)]), msg="Agglomerations don't match")
+	checkEquals(h1$merge, h2$merge, msg="Agglomerations don't match")
 	checkEquals(h1$height, h2$height, msg="Agglomeration heights are not equal")
 	checkEquals(h1$labels, h2$labels, msg="Cluster labels do not match")
+	checkEquals(h1$order, h2$order, msg="Cluster orders do not match")
 }
 
 # --- Test functions ---

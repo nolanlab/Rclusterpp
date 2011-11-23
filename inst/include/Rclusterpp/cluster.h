@@ -38,6 +38,8 @@ namespace Rclusterpp {
 			ssize_t parent1Id() const { return (parent1_) ? parent1_->id() : NULLID(); }
 			ssize_t parent2Id() const { return (parent2_) ? parent2_->id() : NULLID(); }
 
+			void swap_parents() { std::swap(parent1, parent2); }
+
 			distance_type disimilarity() const { return disimilarity_; }
 	
 		private:
