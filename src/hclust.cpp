@@ -149,7 +149,7 @@ BEGIN_RCPP
 	using namespace Rcpp;
 	using namespace Rclusterpp;
 
-	ssize_t N = as<ssize_t>(size);	
+	int N = as<int>(size);	
 	Eigen::NumericMatrix data_e(N, N);
 	
 	populate_strictly_lower(data_e, data);  // Populate strictly lower distance matrix from packed vector
