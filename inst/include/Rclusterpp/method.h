@@ -1,8 +1,6 @@
 #ifndef RCLUSTERP_METHOD_H
 #define RCLUSTERP_METHOD_H
 
-#include <iostream>
-
 namespace Rclusterpp {
 
 	
@@ -138,7 +136,7 @@ namespace Rclusterpp {
 
 
 		template<class Cluster>
-		struct WardsLink : DistanceFunctor<Cluster> {
+		struct WardsLink : public DistanceFunctor<Cluster> {
 			typedef typename Cluster::distance_type result_type;		
 			result_type operator()(const Cluster& c1, const Cluster& c2, result_type d=0.) const {
 				using namespace Eigen;
@@ -178,7 +176,7 @@ namespace Rclusterpp {
 		};
 
 		template<class Cluster>
-		struct WardsMerge : MergeFunctor<Cluster> {									
+		struct WardsMerge : public MergeFunctor<Cluster> {									
 			void operator()(Cluster& co, const Cluster& c1, const Cluster& c2, const Util::IndexList&) const {
 				co.set_center( ((c1.center() * c1.size()) + (c2.center() * c2.size())) / co.size() );
 			}
@@ -205,7 +203,7 @@ namespace Rclusterpp {
 
 
 		template<class Cluster, class Matrix, class Update>
-		class LanceWilliamsMerge : MergeFunctor<Cluster> {
+		class LanceWilliamsMerge : public MergeFunctor<Cluster> {
 			public:
 				typedef typename Matrix::Scalar distance_type;
 				
@@ -261,6 +259,8 @@ namespace Rclusterpp {
 		LinkageMethod(Distancer distancer=Distancer(), Merger merger=Merger()) : distancer(distancer), merger(merger) {}
 	};
 
+	// Clustering from stored data
+
 #define CONST_ROW Matrix::ConstRowXpr
 
 	template<class Matrix>
@@ -289,25 +289,28 @@ namespace Rclusterpp {
 	}
 
 #undef CONST_ROW
-	
+
 	template<class Cluster>
-	LinkageMethod<Cluster, Methods::WardsLink<Cluster>, Methods::WardsMerge<Cluster> > wards_linkage() {
+	LinkageMethod<Cluster, Methods::WardsLink<Cluster>, Methods::WardsMerge<Cluster> > wards_link() {
 		return LinkageMethod<Cluster, Methods::WardsLink<Cluster>, Methods::WardsMerge<Cluster> >();
 	}
 
 	template<class Cluster, class Distance>
-	LinkageMethod<Cluster, Methods::AverageLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> > average_linkage(Distance d) {
+	LinkageMethod<Cluster, Methods::AverageLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> > average_link(Distance d) {
 		return LinkageMethod<Cluster, Methods::AverageLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> >(
 			Methods::AverageLink<Cluster, Distance>(d)
 		); 
 	}
 
 	template<class Cluster, class Distance>
-	LinkageMethod<Cluster, Methods::CompleteLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> > complete_linkage(Distance d) {
+	LinkageMethod<Cluster, Methods::CompleteLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> > complete_link(Distance d) {
 		return LinkageMethod<Cluster, Methods::CompleteLink<Cluster, Distance>, Methods::NoOpMerge<Cluster> >(
 			Methods::CompleteLink<Cluster, Distance>(d)
 		); 
 	}
+
+
+	// Clustering from stored distance via Lance-Williams update
 
 
 	template<class Cluster, class Matrix, class Update>
@@ -316,23 +319,26 @@ namespace Rclusterpp {
 		return method_type(Methods::StoredDistance<Cluster, Matrix>(m), Methods::LanceWilliamsMerge<Cluster, Matrix, Update>(m, u) );		
 	}
 
+
+#define RETURN_TYPE(UPDATE) \
+LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::UPDATE##Update<Cluster,typename Matrix::Scalar> > >
+
 	template<class Cluster, class Matrix>
-	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::AverageUpdate<Cluster,typename Matrix::Scalar> > >
-	average_link(Matrix& m, FromDistanceKinds) {
+	RETURN_TYPE(Average) average_link(Matrix& m, FromDistanceKinds) {
 		return lancewilliams<Cluster>(m, Methods::AverageUpdate<Cluster,typename Matrix::Scalar>());
 	}
 
 	template<class Cluster, class Matrix>
-	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::SingleUpdate<Cluster,typename Matrix::Scalar> > >
-	single_link(Matrix& m, FromDistanceKinds) {
+	RETURN_TYPE(Single) single_link(Matrix& m, FromDistanceKinds) {
 		return lancewilliams<Cluster>(m, Methods::SingleUpdate<Cluster,typename Matrix::Scalar>());
 	}
 
 	template<class Cluster, class Matrix>
-	LinkageMethod<Cluster, Methods::StoredDistance<Cluster, Matrix>, Methods::LanceWilliamsMerge<Cluster, Matrix, Methods::CompleteUpdate<Cluster,typename Matrix::Scalar> > >
-	complete_link(Matrix& m, FromDistanceKinds) {
+	RETURN_TYPE(Complete) complete_link(Matrix& m, FromDistanceKinds) {
 		return lancewilliams<Cluster>(m, Methods::CompleteUpdate<Cluster,typename Matrix::Scalar>());
 	}
+
+#undef RETURN_TYPE
 
 } // end of Rclusterpp namespace
 

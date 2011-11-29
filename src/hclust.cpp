@@ -2,7 +2,10 @@
 #include <functional>
 #include <stack>
 #include <stdexcept>
-#include <cassert>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #include <Rclusterpp.h>
 
@@ -62,6 +65,26 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP get_num_procs() {
+BEGIN_RCPP
+#ifdef _OPENMP
+  return Rcpp::wrap(omp_get_num_procs());
+#else
+  return Rcpp::wrap(1L);
+#endif
+END_RCPP
+}
+
+RcppExport SEXP set_num_threads(SEXP threads) {
+BEGIN_RCPP
+#ifdef _OPENMP
+	omp_set_num_threads(Rcpp::as<int>(threads));
+  return Rcpp::wrap(omp_get_max_threads());
+#else
+  return Rcpp::wrap(1L);
+#endif
+END_RCPP
+}
 
 
 RcppExport SEXP hclust_from_data(SEXP data, SEXP link, SEXP dist, SEXP minkowski) {
@@ -83,7 +106,7 @@ BEGIN_RCPP
 			ClusterVector<cluster_type> clusters(data_e.rows());	
 			init_clusters_from_rows(data_e, clusters);
 	
-			cluster_via_rnn(wards_linkage<cluster_type>(), clusters);
+			cluster_via_rnn( wards_link<cluster_type>(), clusters );
 			
 			return wrap(clusters);	
 		}
@@ -93,7 +116,7 @@ BEGIN_RCPP
 			ClusterVector<cluster_type> clusters(data_e.rows());
 			init_clusters_from_rows(data_e, clusters);
 
-			cluster_via_rnn( average_linkage<cluster_type>( stored_data_rows(data_e, dk, as<double>(minkowski)) ), clusters );
+			cluster_via_rnn( average_link<cluster_type>( stored_data_rows(data_e, dk, as<double>(minkowski)) ), clusters );
 
 			return wrap(clusters);
 		}
@@ -113,7 +136,7 @@ BEGIN_RCPP
 			ClusterVector<cluster_type> clusters(data_e.rows());
 			init_clusters_from_rows(data_e, clusters);
 
-			cluster_via_rnn( complete_linkage<cluster_type>( stored_data_rows(data_e, dk, as<double>(minkowski)) ), clusters );
+			cluster_via_rnn( complete_link<cluster_type>( stored_data_rows(data_e, dk, as<double>(minkowski)) ), clusters );
 
 			return wrap(clusters);
 		}

@@ -34,9 +34,6 @@ RclusterppLdFlags <- function(static=staticLinking()) {
     rclusterppdir <- RclusterppLdPath()
     if (static) {                               # static is default on Windows and OS X
         flags <- paste(rclusterppdir, "/libRclusterpp.a", sep="")
-        #if (.Platform$OS.type=="windows") {
-        #    flags <- shQuote(flags)
-        #}
     } else {					# else for dynamic linking
         flags <- paste("-L", rclusterppdir, " -lRclusterpp", sep="") # baseline setting
         if ((.Platform$OS.type == "unix") &&    # on Linux, we can use rpath to encode path
@@ -44,7 +41,7 @@ RclusterppLdFlags <- function(static=staticLinking()) {
             flags <- paste(flags, " -Wl,-rpath,", rclusterppdir, sep="")
         }
     }
-    invisible(paste(Rcpp:::LdFlags(), flags, sep=" "))  # Include Rcpp LdFlags
+    invisible(paste(Rcpp:::RcppLdFlags(static), flags, sep=" "))  # Include Rcpp LdFlags
 }
 
 ## LdFlags defaults to static linking on the non-Linux platforms Windows and OS X

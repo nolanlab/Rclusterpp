@@ -21,6 +21,10 @@ namespace Rclusterpp {
 		FromDistance
 	};
 
+	enum FromDataKinds {
+		FromData
+	};
+
 	// Forward declarations of internal data structures that can
 	// be converted to R objects via Rcpp wrap functions
 

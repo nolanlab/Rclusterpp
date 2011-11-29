@@ -1,3 +1,9 @@
+Rclusterpp.set_num_threads <- function(threads=1) {
+	threads <- ifelse(is.null(threads), .Call("get_num_procs", PACKAGE="Rclusterpp"), threads)
+	invisible(.Call("set_num_threads", threads=as.integer(threads), NAOK=FALSE, PACKAGE="Rclusterpp"))
+}
+	
+
 Rclusterpp.linkage_kinds <- function() {
 	.Call("linkage_kinds", PACKAGE="Rclusterpp")
 }

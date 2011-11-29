@@ -40,7 +40,7 @@ basic_clustering <- function(data) {
 r <- basic_clustering(as.matrix(USArrests))
 h <- hclust(dist(USArrests, method="euclidean"), method="average")
 
-if (all(r$merge == h$merge | r$merge == h$merge[,c(2,1)])) {
+if (identical(r$merge, h$merge)) {
 	message("Success! Clustering output is the same between Rclusterpp and stats::hclust ...")
 } else {
 	error("Failure! Clustering output doesn't match!")
