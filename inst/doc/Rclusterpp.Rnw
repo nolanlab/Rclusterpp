@@ -1,0 +1,295 @@
+\documentclass[10pt]{article}
+
+%\VignetteIndexEntry{Rclusterpp}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{color, bm, amsmath, listings, multirow}
+\lstset{language=C++,basicstyle=\footnotesize\ttfamily}
+\usepackage[numbers]{natbib}
+
+\usepackage[colorlinks]{hyperref}
+\definecolor{link}{rgb}{0,0,0.3}        %% next few lines courtesy of RJournal.sty
+\hypersetup{
+    colorlinks,%
+    citecolor=link,%
+    filecolor=link,%
+    linkcolor=link,%
+    urlcolor=link
+}
+
+\newcommand{\proglang}[1]{\textsf{#1}}
+\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+<<version,echo=FALSE,print=FALSE>>=
+prettyVersion <- packageDescription("RcppEigen")$Version
+prettyDate <- format(Sys.Date(), "%B %e, %Y")
+@
+
+\author{Michael Linderman}
+\title{An Introduction to \pkg{Rclusterpp}}
+\date{\pkg{Rclusterpp} version \Sexpr{prettyVersion} as of \Sexpr{prettyDate}}
+
+<<preliminaries,echo=FALSE>>=
+require( Rclusterpp )
+Rclusterpp.set_num_threads(1)
+@
+
+\begin{document}
+\maketitle
+
+\abstract{
+	The \pkg{Rclusterpp} package provides alternative implementations for
+	common geometric hierarchical clustering algorithms, e.g., average link clustering,
+	that are optimized for large numbers of observations and efficient execution
+	on modern multicore processors. \pkg{Rclusterpp} can be used directly from
+	\proglang{R} as a replacement for \code{stats::hclust}, or as a linkable
+	\proglang{C++} library. 
+}
+
+\section{Introduction}
+
+Hierarchical clustering is a fundamental data analysis tool. However, the
+$O(n^2)$ memory footprint of commonly available implementations, such as
+\code{stats::hclust}, which maintain the dissimilarity matrix in memory
+(stored-distance) limit these implementations to a tens of thousands of
+observations or less. In the motivating domain for this work, flow cytometry,
+datasets are hundreds of thousands or even millions of observations in size
+(but with low dimensionality, e.g., less than 30). In this and other similar
+contexts building out the complete distance matrix is not possible and
+alternative implementations with $O(n)$ memory footprint are needed. 
+
+The memory requirements of hierarchical clustering have motivated the
+development of alternative clustering algorithms that do not require the full
+dissimilarity matrix. Such algorithms are not the focus of \pkg{Rclusterpp}.
+Often, a much larger application is built and validated around a standard
+hierarchical clustering algorithm, e.g. average-link, and only later scaled to large
+datasets. In these cases, we wish to maintain the same algorithm
+but scale efficiently. Thus the goal for \pkg{Rclusterpp} is to provide
+efficient ``stored data'' implementations for common hierarchical clustering
+routines, e.g., single, complex, average and Ward's linkage, that scale to
+hundreds of thousands of observations while delivering identical results as the
+``stock'' \code{stats::hclust} implementation. 
+ 
+As an example, the following two statements produce identical results:
+<<simple>>=
+h <- hclust(dist(USArrests, method="euclidean"), method="average")
+r <- Rclusterpp.hclust(USArrests, method="average", distance="euclidean")
+# Check equality of the dedrogram tree and agglomeration heights
+identical(h$merge, r$merge) && all.equal(h$height, r$height)
+@
+however, in the latter, the memory footprint is on the order of
+$O(n)$ as opposed to $O(n^2)$, for $n$ observations (ignoring the footprint of
+the data itself). The trade-off can, but does not have to, be increased
+computation. In such cases, \pkg{Rclusterpp} purposely trades time for space.
+Fortunately there exist algorithms for some commonly used clustering methods,
+specifically Ward's minimum variance method and single-link, that achieve
+optimal time complexity with only $O(n)$ space. \pkg{Rclusterpp} implements
+those more efficient algorithms when possible. Section~\ref{sec:data} includes
+a summary of the complexity of each linkage method as implemented.
+
+The computational demanding components of \pkg{Rclusterpp} are implemented in
+\proglang{C++} using OpenMP\footnote{OpenMP is only enabled on Linux and OSX
+due to issues with the pthreads compatibility DLL on Windows} to take advantage
+of multi-core processors and multi-processor shared memory computers. Thus even
+when incurring additional computation costs to reduce the memory footprint
+\pkg{Rclusterpp} is faster than \code{stats::hclust}, and in cases, such as
+Ward's linkage, where no such trade-off exists, \pkg{Rclusterpp} can be faster
+than even the ``fast'' stored-distance clustering packages like
+\pkg{fastcluster}. Sample benchmark results are shown in
+Table~\ref{tab:dataperf}.
+
+\begin{table}
+\centering
+\label{tab:dataperf}
+\caption{Execution time averaged across 5 runs for various clustering
+implementations (including distance computation) for Ward's minimum variance
+method for $n\times 10$ input data measured on a quad-core 3.05 GHz Intel i7 950 server}
+\begin{tabular}{l c c}\small
+Implementation & Exec. Time (s) & $n$ \\
+\hline
+ Rclusterpp &   0.0006 & \multirow{3}{*}{100} \\
+fastcluster &   0.0008 & \\
+     hclust &   0.0028 & \\
+\hline
+ Rclusterpp &   0.0036 & \multirow{3}{*}{500} \\
+fastcluster &   0.0208 & \\
+     hclust &   0.2606 & \\
+\hline
+ Rclusterpp &   0.0092 & \multirow{3}{*}{1000} \\
+fastcluster &   0.1252 & \\
+     hclust &   1.8012 & \\
+\hline
+ Rclusterpp &   0.1814 & \multirow{3}{*}{5000} \\
+fastcluster &   2.6246 & \\
+     hclust & 199.1894 & \\
+\end{tabular}
+\end{table}
+
+In some applications, such as the WGNCA~\cite{Zhang2005} algorithm that
+motivated this work, the distance matrix is already computed in a previous
+stage of the workflow and thus there is no advantage to be gained with
+stored-data approaches. However, memory footprint is still a concern. Those
+individuals who have attempted to cluster more than 46340 observations have
+discovered that \proglang{R} limits matrices to $2^31$ elements or less. In
+these cases, it is desirable to perform all of the memory intensive components
+of the workflow on the ``\proglang{C++} side'', where there is no such limit
+and where the implementor has more control over the creation of temporaries.
+\pkg{Rclusterpp} exposes its various clustering implementations as a templated
+library that can be linked against by other \proglang{C++}-backed R packages
+(modeled on the techniques used in the \pkg{Rcpp} package). 
+
+\section{Stored-data Hierarchical Clustering}
+\label{sec:data}
+
+\pkg{Rclusterpp} currently implements a subset of the clustering methods and
+distance metrics provided by \code{stats::hclust}. Specifically,
+\pkg{Rclusterpp} currently supports the following linkage methods:
+<<linkages>>=
+Rclusterpp.linkage_kinds()
+@
+and the following distance metrics:
+<<distances>>=
+Rclusterpp.distance_kinds()
+@
+The linkage methods are currently limited to reducible geometric methods that
+can implemented exactly using the {\it recursive nearest neighbor (RNN)}
+algorithm~\cite{Murtagh1983}.
+
+Table~\ref{tab:complexity} shows the worst-case time and space
+complexities~\cite{Murtagh1984} for the algorithms used in \pkg{Rclusterpp}. As
+described previously, Ward's and single-link are implemented with optimal time
+and space using RNN and SLINK~\cite{Sibson1973} algorithms
+respectively. While average and complete-link trade increased time bounds,
+$O(n^3)$ versus $O(n^2)$, in exchange for reducing the memory footprint to
+$O(n)$ from $O(n^2)$.
+
+\begin{table}
+	\centering
+	\label{tab:complexity}
+	\caption{Worst-case time and space complexities for the \pkg{Rclusterpp}
+	stored-data implementation (not including the original $O(n*m)$ data footprint)}
+	\begin{tabular}{l c c c}\small
+	Method & Algorithm & Time Complexity & Space Complexity \\
+	\hline
+	Average  & RNN & $O(n^3*m)$ & $O(n)$ \\
+	Complete & RNN & $O(n^3*m)$ & $O(n)$ \\
+	Ward     & RNN & $O(n^2*m)$ & $O(n*m)$ \\
+	Single   & SLINK & $O(n^2*m)$ & $O(n)$ \\
+	\end{tabular}
+\end{table}
+
+As shown previously, the \code{Rclusterpp.hclust} function has a very similar
+interface to \code{stats::hclust}, but will also accept a numeric matrix (instead
+of a \code{dist} object) and a distance metric. The return value is the same
+\code{hclust} object as produced by \code{stats::hclust}.
+
+Since the underlying components of the clustering implementation, including the
+RNN implementation, linkage methods and distance functions, are all exposed as
+a templated C++ library, users can readily create derivative packages that
+implement custom clustering methodologies without starting from scratch.
+Section~\ref{sec:distance} has more information on how to work with the C++
+library (in the context of stored-distance implementations, but the information
+is just as a applicable to stored-data). In addition, the interested user is
+pointed to the source for \code{hclust\_from\_data}, the \proglang{C++}
+function called by \code{Rclusterpp.hclust}, which is itself a consumer of
+the templated library.
+
+\section{Stored-distance Hierarchical Clustering (in C++)}
+\label{sec:distance}
+
+\code{Rclusterpp.hclust} can be used as a limited-functionality replacement for
+\code{stats::hclust}, i.e., it will accept a \code{dist} object as input.
+However, as shown Table~\ref{tab:distperf}, in this usage \pkg{Rcpp} is often slower than
+\pkg{fastcluster} and other packages specifically optimized for this use case.
+Instead, \pkg{Rclusterpp}'s stored-distance functionality is intended for use
+as linkable C++ library.
+
+\begin{table}
+\centering
+\label{tab:distperf}
+\caption{Execution time averaged across 5 runs for various clustering
+implementations (including distance computation) for average-link/euclidean
+distance clustering on $n\times 10$ input data measured on a quad-core 3.05 GHz Intel i7 950
+server. \code{RclusterppDistance} is the stored-distance method and \code{Rclusterpp} is the stored data implementation.}
+\begin{tabular}{l c c}\small
+Implementation & Exec. Time (s) & $n$ \\
+\hline
+        fastcluster &   0.0008 & \multirow{3}{*}{100} \\ 
+ RclusterppDistance &   0.0014 & \\ 
+         Rclusterpp &   0.0014 & \\ 
+             hclust &   0.0028 & \\
+\hline
+        fastcluster &   0.0182 & \multirow{3}{*}{500} \\ 
+ RclusterppDistance &   0.0220 & \\ 
+         Rclusterpp &   0.0376 & \\ 
+             hclust &   0.2354 & \\
+\hline
+        fastcluster &   0.1306 & \multirow{3}{*}{1000}  \\ 
+ RclusterppDistance &   0.1364 & \\ 
+         Rclusterpp &   0.1508 & \\ 
+             hclust &   1.7396 & \\
+\hline
+        fastcluster &   2.4642 & \multirow{3}{*}{5000}  \\ 
+ RclusterppDistance &   2.8008 & \\ 
+         Rclusterpp &   5.5344 & \\ 
+             hclust & 204.2906 & \\ 
+\end{tabular}
+\end{table}
+
+\pkg{Rclusterpp} is modeled on the \pkg{Rcpp*} family of packages.
+\pkg{Rclusterpp} provides its own skeleton function,
+\code{Rclusterpp.package.skeleton}, which can be used to generate new packages
+that are setup to link against the \pkg{Rclusterpp} library. Alternately one
+can use the \pkg{inline} package to compile C++ code from within R. The
+\pkg{Rclusterpp} package includes an example ``inline" function, shown below,
+which we will use that as our working example in this document. 
+<<example>>=
+cat(readLines(system.file("examples","clustering.R",package="Rclusterpp")),sep="\n")
+@
+
+Rclusterpp makes extensive use of \pkg{Rcpp} to build the interface between
+\proglang{R} and \proglang{C++}, and the \pkg{Eigen} library (via
+\pkg{RcppEigen}) for matrix and vector operations. A working knowledge of both
+libraries will be needed to effectively use \pkg{Rclusterpp} as this lower
+level.
+
+\pkg{Rclusterpp} provides several convenience \code{typedef}s for working at
+the interface of Eigen and \proglang{R}, in this case, we use
+\code{MapNumericMatrix} to wrap, or ``map'', an Eigen \code{Matrix} around the
+\proglang{R} data pointer (and thus no copy is involved) for use with Eigen
+operators. We further create a \code{NumericMatrix} to store the distance
+matrix we will compute, and extract a reference to the strictly lower portion
+of that matrix for use in the clustering routine.
+
+At present, \pkg{Rclusterpp} assumes the dissimilarities are in the strictly
+lower portion of the matrix, and will not work with other inputs.
+
+Agglomerations are tracked in \code{ClusterVector} object. The user needs to
+select the appropriate cluster type for their problem. A templated type factory,
+\code{ClusterTypes} is provided to assist in this selection
+(\code{NumericCluster} is a convenience \code{typedef} for this factory for
+\code{NumericMatrix}).
+\begin{lstlisting}
+typedef ClusterTypes<Rcpp::NumericMatrix::stored_type> NumericCluster;	
+NumericCluster::plain;  // Simplest cluster, used for stored-distance
+NumericCluster::center; // Maintains cluster "center", used for Ward's linkage
+NumericCluster::obs;    // Tracks obs in each cluster, used for Average, Complete...
+\end{lstlisting}
+Clustering is performed by specifying the clustering method, i.e., RNN, the
+linkage method and the initialized cluster vector. In this case we are
+performing stored-distance average link clustering using the distance matrix
+computed earlier. Note that the stored-distance linkage methods are implemented
+with Lance-Williams update algorithm and are destructive to the strictly lower
+portion of the dissimilarity matrix. 
+
+At the completion of the clustering, the cluster vector will contain all of the
+agglomerations along with the agglomeration heights. \pkg{Rclusterpp} extends
+\pkg{Rcpp} with a \code{wrap} implementation that will translate that
+vector into a \proglang{R} list with the \code{merge}, \code{height} and
+\code{order} entries needed for the \code{hclust} object. 
+
+\clearpage
+\bibliographystyle{plainnat} 
+\bibliography{ref}
+\end{document}
