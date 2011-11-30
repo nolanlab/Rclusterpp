@@ -65,7 +65,7 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP get_num_procs() {
+RcppExport SEXP rclusterpp_get_num_procs() {
 BEGIN_RCPP
 #ifdef _OPENMP
   return Rcpp::wrap(omp_get_num_procs());
@@ -75,7 +75,7 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP set_num_threads(SEXP threads) {
+RcppExport SEXP rclusterpp_set_num_threads(SEXP threads) {
 BEGIN_RCPP
 #ifdef _OPENMP
 	omp_set_num_threads(Rcpp::as<int>(threads));

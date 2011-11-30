@@ -1,6 +1,6 @@
 Rclusterpp.set_num_threads <- function(threads=1) {
-	threads <- ifelse(is.null(threads), .Call("get_num_procs", PACKAGE="Rclusterpp"), threads)
-	invisible(.Call("set_num_threads", threads=as.integer(threads), NAOK=FALSE, PACKAGE="Rclusterpp"))
+	threads <- ifelse(is.null(threads), .Call("rclusterpp_get_num_procs", PACKAGE="Rclusterpp"), threads)
+	invisible(.Call("rclusterpp_set_num_threads", threads=as.integer(threads), NAOK=FALSE, PACKAGE="Rclusterpp"))
 }
 	
 
