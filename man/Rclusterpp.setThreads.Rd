@@ -1,5 +1,5 @@
-\name{Rclusterpp.set_num_threads}
-\alias{Rclusterpp.set_num_threads}
+\name{Rclusterpp.setThreads}
+\alias{Rclusterpp.setThreads}
 \title{
 Set number of threads used in clustering
 }
@@ -7,7 +7,7 @@ Set number of threads used in clustering
 Sets the number of threads used by the OpenMP based parallelism in hierarchical clustering.
 }
 \usage{
-Rclusterpp.set_num_threads(threads = 1)
+Rclusterpp.setThreads(threads = 1)
 }
 \arguments{
   \item{threads}{
@@ -35,8 +35,8 @@ Michael Linderman
 }
 \examples{
 # Set to one thread
-Rclusterpp.set_num_threads(1)
+Rclusterpp.setThreads(1)
 
 # Set to number of threads equal to number of processors
-Rclusterpp.set_num_threads()
+Rclusterpp.setThreads()
 }

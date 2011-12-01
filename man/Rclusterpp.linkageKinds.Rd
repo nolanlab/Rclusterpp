@@ -1,6 +1,6 @@
-\name{Rclusterpp.linkage_kinds}
-\alias{Rclusterpp.linkage_kinds}
-\alias{Rclusterpp.distance_kinds}
+\name{Rclusterpp.linkageKinds}
+\alias{Rclusterpp.linkageKinds}
+\alias{Rclusterpp.distanceKinds}
 \title{
 	Linkage and distance kinds available in Rclusterpp
 }
@@ -9,8 +9,8 @@
 	that correspond with internal enums. Intended for use with \samp{pmatch}. 
 }
 \usage{
-Rclusterpp.linkage_kinds()
-Rclusterpp.distance_kinds()
+Rclusterpp.linkageKinds()
+Rclusterpp.distanceKinds()
 }
 \details{
 	Returns character vectors whose ordering enables integer to enum conversion
@@ -30,6 +30,6 @@ Michael Linderman
 \link[Rclusterpp]{Rclusterpp.hclust}
 }
 \examples{
-	Rclusterpp.linkage_kinds()
-	Rclusterpp.distance_kinds()
+	Rclusterpp.linkageKinds()
+	Rclusterpp.distanceKinds()
 }

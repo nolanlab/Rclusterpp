@@ -1,19 +1,19 @@
-Rclusterpp.set_num_threads <- function(threads=1) {
+Rclusterpp.setThreads <- function(threads=1) {
 	threads <- ifelse(is.null(threads), .Call("rclusterpp_get_num_procs", PACKAGE="Rclusterpp"), threads)
 	invisible(.Call("rclusterpp_set_num_threads", threads=as.integer(threads), NAOK=FALSE, PACKAGE="Rclusterpp"))
 }
 	
 
-Rclusterpp.linkage_kinds <- function() {
+Rclusterpp.linkageKinds <- function() {
 	.Call("linkage_kinds", PACKAGE="Rclusterpp")
 }
 
-Rclusterpp.distance_kinds <- function() {
+Rclusterpp.distanceKinds <- function() {
 	.Call("distance_kinds", PACKAGE="Rclusterpp")
 }
 
 Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidean", p=2) {
-	METHODS <- Rclusterpp.linkage_kinds()
+	METHODS <- Rclusterpp.linkageKinds()
 	method  <- pmatch(method, METHODS)
 	if (is.na(method))
 		stop("Invalid clustering method")
@@ -42,7 +42,7 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
 			stop("members must be null when clustering from data")
 		}
 
-		DISTANCES <- Rclusterpp.distance_kinds()
+		DISTANCES <- Rclusterpp.distanceKinds()
 		distance  <- pmatch(distance, DISTANCES)
 		if (is.na(distance))
 			stop("Invalid distance metric")

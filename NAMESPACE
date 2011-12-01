@@ -2,7 +2,7 @@ useDynLib(Rclusterpp)
 export(
 	"Rclusterpp.hclust",
 	"Rclusterpp.package.skeleton",
-	"Rclusterpp.linkage_kinds",
-	"Rclusterpp.distance_kinds",
-	"Rclusterpp.set_num_threads"
+	"Rclusterpp.linkageKinds",
+	"Rclusterpp.distanceKinds",
+	"Rclusterpp.setThreads"
 )

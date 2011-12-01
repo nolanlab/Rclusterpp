@@ -32,7 +32,7 @@ prettyDate <- format(Sys.Date(), "%B %e, %Y")
 
 <<preliminaries,echo=FALSE>>=
 require( Rclusterpp )
-Rclusterpp.set_num_threads(1)
+Rclusterpp.setThreads(1)
 @
 
 \begin{document}
@@ -146,11 +146,11 @@ library that can be linked against by other \proglang{C++}-backed R packages
 distance metrics provided by \code{stats::hclust}. Specifically,
 \pkg{Rclusterpp} currently supports the following linkage methods:
 <<linkages>>=
-Rclusterpp.linkage_kinds()
+Rclusterpp.linkageKinds()
 @
 and the following distance metrics:
 <<distances>>=
-Rclusterpp.distance_kinds()
+Rclusterpp.distanceKinds()
 @
 The linkage methods are currently limited to reducible geometric methods that
 can implemented exactly using the {\it recursive nearest neighbor (RNN)}
