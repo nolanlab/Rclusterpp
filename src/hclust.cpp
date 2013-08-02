@@ -156,8 +156,9 @@ namespace {
 		if (TYPEOF(data) != RTYPE)
 			throw std::invalid_argument("Wrong R type for mapped vector");
 		
-		typedef ::Rcpp::traits::storage_type<RTYPE>::type STORAGE;
-		double *d_start = ::Rcpp::internal::r_vector_start<RTYPE,STORAGE>(data);
+		//typedef ::Rcpp::traits::storage_type<RTYPE>::type STORAGE;
+		//double *d_start = ::Rcpp::internal::r_vector_start<RTYPE,STORAGE>(data);
+		double *d_start = REAL(data);
 
 		for (ssize_t c=0; c<N-1; c++) {
 			m.block(c+1 /* starting row */, c, N-(c+1) /* numer of rows*/, 1) = Eigen::Map<Eigen::NumericMatrix>(d_start,N-(c+1),1);

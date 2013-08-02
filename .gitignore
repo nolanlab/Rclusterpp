@@ -9,3 +9,4 @@ config.status
 *.o
 inst/unit_tests/report*
 autom4te.cache
+.Rproj.user
