@@ -23,6 +23,8 @@ threads as processors are created. To control the number of threads set the
 
 ## Installation
 Rclusterpp can be installed from github using the devtools package.  
- R> install.packages("devtools")
- R> library("devtools")
- R> install_github('Rclusterpp',username='nolanlab')
+```
+R> install.packages("devtools")
+R> library("devtools")
+R> install_github('Rclusterpp',username='nolanlab')
+```
