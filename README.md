@@ -22,9 +22,4 @@ threads as processors are created. To control the number of threads set the
 `OMP_NUM_THREADS` environment variable.
 
 ## Installation
-Rclusterpp can be installed from github using the devtools package.  
-```
-R> install.packages("devtools")
-R> library("devtools")
-R> install_github('Rclusterpp',username='nolanlab')
-```
+Rclusterpp installation instructions can be found on the [project wiki](https://github.com/nolanlab/Rclusterpp/wiki/Getting-Started).
