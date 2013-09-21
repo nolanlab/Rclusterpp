@@ -1,8 +1,6 @@
 #ifndef RCLUSTERPPFORWARD_H
 #define RCLUSTERPPFORWARD_H
 
-#include <Rclusterpp.h>
-
 namespace Rclusterpp {
 
 	enum LinkageKinds {
