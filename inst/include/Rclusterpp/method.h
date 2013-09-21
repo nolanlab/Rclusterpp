@@ -273,8 +273,8 @@ namespace Rclusterpp {
 		> distancer_type;
 
 		switch (dk) {
-			default:
-				throw std::invalid_argument("Linkage or distance method not yet supported");
+			default: 
+        throw std::invalid_argument("Linkage or distance method not yet supported");
 			case Rclusterpp::EUCLIDEAN:
 				return distancer_type(m, std::ptr_fun(&Methods::euclidean_distance<typename CONST_ROW>));
 			case Rclusterpp::MANHATTAN:

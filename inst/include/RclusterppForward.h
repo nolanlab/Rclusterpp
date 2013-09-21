@@ -1,6 +1,8 @@
 #ifndef RCLUSTERPPFORWARD_H
 #define RCLUSTERPPFORWARD_H
 
+#include <Rclusterpp.h>
+
 namespace Rclusterpp {
 
 	enum LinkageKinds {
@@ -53,8 +55,8 @@ namespace Rcpp {
 	// methods. The relationship between the index and the method needs to be kept'
 	// in sync with the R-bindings.
 	
-	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible);	
-	template <> Rclusterpp::DistanceKinds as(SEXP x) throw(not_compatible);
+	template <> Rclusterpp::LinkageKinds as(SEXP x);	
+	template <> Rclusterpp::DistanceKinds as(SEXP x);
 
 	template <> SEXP wrap( const Rclusterpp::Hclust& );
 	template <typename T> SEXP wrap( const Rclusterpp::ClusterVector<T>& ) ;

@@ -1,9 +1,6 @@
 #ifndef RCLUSTERPP_H
 #define RCLUSTERPP_H
 
-#include <RcppCommon.h>
-
-
 #define EIGEN_MATRIXBASE_PLUGIN <RclusterppEigenMatrixPlugin.h>
 #define EIGEN_ARRAYBASE_PLUGIN <RclusterppEigenArrayPlugin.h>
 #include <RcppEigenForward.h>
