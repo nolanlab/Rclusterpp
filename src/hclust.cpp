@@ -15,7 +15,7 @@ namespace Rcpp {
 		return Eigen::RowMajorNumericMatrix(as<Eigen::MapNumericMatrix>(x));
 	}
 
-	template <> Rclusterpp::LinkageKinds as(SEXP x) throw(not_compatible) {
+	template <> Rclusterpp::LinkageKinds as(SEXP x){
 		switch (as<int>(x)) {
 			default: throw not_compatible("Linkage method invalid or not yet supported"); 
 			case 1: return Rclusterpp::WARD;
@@ -25,7 +25,7 @@ namespace Rcpp {
 		}
 	}
 	
-	template <> Rclusterpp::DistanceKinds as(SEXP x) throw(not_compatible) {
+	template <> Rclusterpp::DistanceKinds as(SEXP x){
 		switch (as<int>(x)) {
 			default: throw not_compatible("Distance method invalid or not yet supported"); 
 			case 1: return Rclusterpp::EUCLIDEAN;
@@ -98,8 +98,8 @@ BEGIN_RCPP
 	DistanceKinds dk = as<DistanceKinds>(dist);
 
 	switch (lk) {
-		default:
-			throw std::invalid_argument("Linkage or distance method not yet supported");
+		default: 
+      throw std::invalid_argument("Linkage or distance method not yet supported");
 		case Rclusterpp::WARD: {
 			typedef NumericCluster::center cluster_type;
 
@@ -186,7 +186,7 @@ BEGIN_RCPP
 
 	LinkageKinds  lk = as<LinkageKinds>(link);
 	switch (lk) {
-	default:
+	default: 
 		throw std::invalid_argument("Linkage or distance method not yet supported");
 	case Rclusterpp::AVERAGE:
 		cluster_via_rnn( average_link<cluster_type>(data_t, FromDistance), clusters );
