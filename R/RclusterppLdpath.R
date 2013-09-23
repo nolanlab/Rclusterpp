@@ -2,7 +2,7 @@
 
 ## Make sure system.file returns an absolute path
 Rclusterpp.system.file <- function(...){
-    tools:::file_path_as_absolute( base:::system.file( ..., package = "Rclusterpp" ) )
+    tools::file_path_as_absolute( base::system.file( ..., package = "Rclusterpp" ) )
 }
 
 ## Identifies if the default linking on the platform should be static
@@ -41,7 +41,7 @@ RclusterppLdFlags <- function(static=staticLinking()) {
             flags <- paste(flags, " -Wl,-rpath,", rclusterppdir, sep="")
         }
     }
-    invisible(paste(Rcpp:::RcppLdFlags(static), flags, sep=" "))  # Include Rcpp LdFlags
+    invisible(paste(Rcpp::RcppLdFlags(static), flags, sep=" "))  # Include Rcpp LdFlags
 }
 
 ## LdFlags defaults to static linking on the non-Linux platforms Windows and OS X
