@@ -18,7 +18,7 @@ clustering algorithms.
 \author{
 Michael D. Linderman, Robert Bruggner
 
-Maintainer: Michael D. Linderman <michael.d.linderman@gmail.com>
+Maintainer: Robert Bruggner <rbruggner@gmail.com>
 }
 \references{
 Murtagh, F. (1983), "A survey of recent advances in hierarchical clustering algorithms", Computer Journal, 26, 354-359.

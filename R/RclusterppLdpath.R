@@ -41,7 +41,8 @@ RclusterppLdFlags <- function(static=staticLinking()) {
             flags <- paste(flags, " -Wl,-rpath,", rclusterppdir, sep="")
         }
     }
-    invisible(paste(Rcpp::RcppLdFlags(static), flags, sep=" "))  # Include Rcpp LdFlags
+    invisible(flags)
+    #invisible(paste(Rcpp::RcppLdFlags(static), flags, sep=" "))
 }
 
 ## LdFlags defaults to static linking on the non-Linux platforms Windows and OS X
