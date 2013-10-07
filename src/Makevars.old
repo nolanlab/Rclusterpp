@@ -1,0 +1,33 @@
+# Build both the default package library, along with with a second target
+# userLibrary that users can link their packages against. This approach is 
+# modeled on Rcpp, on which this package depends.
+all: $(SHLIB) userLibrary
+
+# We place it inside the inst/ directory so that it gets installed by the package
+USERDIR =	../inst/lib
+
+USERLIB	=	libRclusterpp$(DYLIB_EXT)
+USERLIBST =	libRclusterpp.a
+
+PKG_CPPFLAGS += -Wall -I../inst/include/ @OPENMP_CXXFLAGS@
+PKG_LIBS += `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` @OPENMP_CXXFLAGS@ 
+
+
+userLibrary: 	$(USERLIB) $(USERLIBST)
+		-@if test ! -e $(USERDIR)$(R_ARCH); then mkdir -p $(USERDIR)$(R_ARCH); fi
+		cp $(USERLIB) $(USERDIR)$(R_ARCH)
+		cp $(USERLIBST) $(USERDIR)$(R_ARCH)
+		rm $(USERLIB) $(USERLIBST)
+
+$(USERLIB): 	$(OBJECTS)
+		$(SHLIB_CXXLD) -o $(USERLIB) $(OBJECTS) $(SHLIB_CXXLDFLAGS) $(ALL_LIBS)
+		@if test -e "/usr/bin/install_name_tool"; then /usr/bin/install_name_tool -id $(R_PACKAGE_DIR)/lib$(R_ARCH)/$(USERLIB) $(USERLIB); fi
+
+$(USERLIBST): 	$(OBJECTS)
+		$(AR) qc $(USERLIBST) $(OBJECTS)
+		@if test -n "$(RANLIB)"; then $(RANLIB) $(USERLIBST); fi
+
+.PHONY: 	all clean userLibrary 
+
+clean:
+		rm -f $(OBJECTS) $(SHLIB) $(USERLIB) $(USERLIBST)
