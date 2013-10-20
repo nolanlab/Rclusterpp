@@ -2,7 +2,6 @@ inst/lib
 src-i386
 src-x86_64
 .DS_Store
-src/Makevars
 config.log
 config.status
 *.so
