@@ -22,7 +22,7 @@
 \newcommand{\code}[1]{\texttt{#1}}
 
 <<version,echo=FALSE,print=FALSE>>=
-prettyVersion <- packageDescription("RcppEigen")$Version
+prettyVersion <- packageDescription("Rclusterpp")$Version
 prettyDate <- format(Sys.Date(), "%B %e, %Y")
 @
 
