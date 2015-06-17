@@ -1,6 +1,3 @@
-#include <algorithm>
-#include <functional>
-#include <stack>
 #include <stdexcept>
 
 #ifdef _OPENMP
@@ -9,37 +6,6 @@
 
 #include <Rclusterpp.h>
 
-namespace Rcpp {
-
-	template <> Eigen::RowMajorNumericMatrix as(SEXP x) {
-		return Eigen::RowMajorNumericMatrix(as<Eigen::MapNumericMatrix>(x));
-	}
-
-	template <> Rclusterpp::LinkageKinds as(SEXP x){
-		switch (as<int>(x)) {
-			default: throw not_compatible("Linkage method invalid or not yet supported"); 
-			case 1: return Rclusterpp::WARD;
-			case 2: return Rclusterpp::AVERAGE;
-			case 3: return Rclusterpp::SINGLE;
-			case 4: return Rclusterpp::COMPLETE;
-		}
-	}
-	
-	template <> Rclusterpp::DistanceKinds as(SEXP x){
-		switch (as<int>(x)) {
-			default: throw not_compatible("Distance method invalid or not yet supported"); 
-			case 1: return Rclusterpp::EUCLIDEAN;
-			case 2: return Rclusterpp::MANHATTAN;
-			case 3: return Rclusterpp::MAXIMUM;
-			case 4: return Rclusterpp::MINKOWSKI;
-		}
-	}
-
-	template <> SEXP wrap( const Rclusterpp::Hclust& hclust ) {
-		return List::create( _["merge"] = hclust.merge, _["height"] = hclust.height, _["order"] = hclust.order ); 
-	}
-
-} // Rcpp
 
 RcppExport SEXP linkage_kinds() {
 BEGIN_RCPP
@@ -156,8 +122,6 @@ namespace {
 		if (TYPEOF(data) != RTYPE)
 			throw std::invalid_argument("Wrong R type for mapped vector");
 		
-		//typedef ::Rcpp::traits::storage_type<RTYPE>::type STORAGE;
-		//double *d_start = ::Rcpp::internal::r_vector_start<RTYPE,STORAGE>(data);
 		double *d_start = REAL(data);
 
 		for (ssize_t c=0; c<N-1; c++) {
