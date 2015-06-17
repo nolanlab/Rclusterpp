@@ -69,8 +69,8 @@ these cases, we wish to maintain the same functionality, an if possible the
 same results, but scale efficiently. Thus the goal for \pkg{Rclusterpp} is to
 provide efficient ``stored data'' implementations for common hierarchical
 clustering routines, e.g., single, complex, average and Ward's linkage, that
-scale to hundreds of thousands of observations while delivering 
-results identical to the ``stock'' \code{stats::hclust} implementation. 
+scale to hundreds of thousands of observations while aiming to deliver 
+results identical to the ``stock'' \code{stats::hclust} implementation (if the cluster hierarchy is unambiguous, then the results should be identical).
  
 As an example, the following two statements produce identical results:
 <<simple>>=
