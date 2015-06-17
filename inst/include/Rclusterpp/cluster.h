@@ -43,7 +43,8 @@ namespace Rclusterpp {
 			distance_type disimilarity() const { return disimilarity_; }
 	
 		private:
-			
+			Cluster() {}
+      
 			ssize_t id_;
 			size_t  idx_;
 			size_t  size_;
@@ -57,7 +58,7 @@ namespace Rclusterpp {
 
 	template<class Cluster>
 	inline bool compare_id(Cluster const* l, Cluster const* r) {
-		return l->id() < r->id();
+		return l->id() > r->id();
 	}
 
 	template<class Cluster>
@@ -167,7 +168,7 @@ namespace Rclusterpp {
 			typedef typename underlying_type::const_iterator  const_iterator;
 			typedef typename underlying_type::size_type       size_type;
 		
-			ClusterVector(size_t n) : initial_(n), clusters_(n) {}
+			ClusterVector(size_t n) : initial_(n), clusters_(n, 0) {}
 			
 			~ClusterVector() {
 				for (iterator i=begin(), e=end(); i!=e; ++i)
@@ -205,12 +206,11 @@ namespace Rclusterpp {
 
 		private:
 
-			ClusterVector() : clusters_() {}
+			ClusterVector() {}
 			explicit ClusterVector(const ClusterVector& v);
 
 			size_t          initial_;  // Number of initial clusters
 			underlying_type clusters_;
-
 	};
 
 	

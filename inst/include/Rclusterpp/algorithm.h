@@ -131,9 +131,12 @@ namespace Rclusterpp {
 		// from -1 .. -initial_clusters, followed by the agglomerated clusters sorted by
 		// increasing disimilarity.
 		
-		std::partition(clusters.begin(), clusters.end(), std::mem_fun(&cluster_type::initial));
-		std::sort(clusters.begin(), clusters.begin()+initial_clusters, std::not2(std::ptr_fun(&compare_id<cluster_type>))); 
-		std::sort(clusters.begin() + initial_clusters, clusters.end(), std::ptr_fun(&compare_disimilarity<cluster_type>)); 
+    // Note, sort requires strict weak ordering and will fail in a data dependent way
+    // if the comparison function does not satisfy that requirement
+    
+		typename clusters_type::iterator part = std::partition(clusters.begin(), clusters.end(), std::mem_fun(&cluster_type::initial));
+    std::sort(clusters.begin(), part, &compare_id<cluster_type>); 
+		std::sort(part, clusters.end(), std::ptr_fun(&compare_disimilarity<cluster_type>)); 
 
 		for (size_t i=initial_clusters; i<result_clusters; i++) {
 			clusters[i]->set_id(i - initial_clusters + 1);  // Use R hclust 1-indexed convention for Id's

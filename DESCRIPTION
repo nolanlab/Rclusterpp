@@ -1,7 +1,7 @@
 Package: Rclusterpp
 Type: Package
 Title: Linkable C++ clustering
-Version: 0.2.3
+Version: 0.2.4
 Date: 2013-09-23
 Authors@R: c(person("Michael Linderman",role="aut",email="michael.d.linderman@gmail.com"),
 	     person("Robert Bruggner",role="cre",email="rbruggner@gmail.com"))
