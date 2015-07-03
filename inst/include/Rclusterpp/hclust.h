@@ -98,13 +98,42 @@ namespace Rclusterpp {
 } // end of Rclusterpp namespace
 
 namespace Rcpp {
-	template <> SEXP wrap( const Rclusterpp::Hclust& hclust );
+	//template <> SEXP wrap( const Rclusterpp::Hclust& hclust );
 
 	template <typename T> SEXP wrap( const Rclusterpp::ClusterVector<T>& clusters ) {
 		Rclusterpp::Hclust hclust(clusters.initial_clusters());
 		Rclusterpp::populate_Rhclust(clusters, hclust);
 		return Rcpp::wrap(hclust);
 	}
+  
+  template <> Eigen::RowMajorNumericMatrix as(SEXP x) {
+  	return Eigen::RowMajorNumericMatrix(as<Eigen::MapNumericMatrix>(x));
+	}
+
+	template <> Rclusterpp::LinkageKinds as(SEXP x){
+		switch (as<int>(x)) {
+			default: throw not_compatible("Linkage method invalid or not yet supported"); 
+			case 1: return Rclusterpp::WARD;
+			case 2: return Rclusterpp::AVERAGE;
+			case 3: return Rclusterpp::SINGLE;
+			case 4: return Rclusterpp::COMPLETE;
+		}
+	}
+	
+	template <> Rclusterpp::DistanceKinds as(SEXP x){
+		switch (as<int>(x)) {
+			default: throw not_compatible("Distance method invalid or not yet supported"); 
+			case 1: return Rclusterpp::EUCLIDEAN;
+			case 2: return Rclusterpp::MANHATTAN;
+			case 3: return Rclusterpp::MAXIMUM;
+			case 4: return Rclusterpp::MINKOWSKI;
+		}
+	}
+
+	template <> SEXP wrap( const Rclusterpp::Hclust& hclust ) {
+		return List::create( _["merge"] = hclust.merge, _["height"] = hclust.height, _["order"] = hclust.order ); 
+	}
+  
 } // Rcpp namespace
 
 #endif

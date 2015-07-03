@@ -28,7 +28,7 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
 								 data = as.double(x),
 								 size = as.integer(attributes(x)$Size),
 								 link = as.integer(method), 
-								 DUP = FALSE, NAOK = FALSE, PACKAGE = "Rclusterpp" )
+								 NAOK = FALSE, PACKAGE = "Rclusterpp" )
 	
 		hcl$labels      = labels 
 		hcl$method      = METHODS[method]
@@ -60,7 +60,7 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
 								 link = as.integer(method), 
 								 dist = as.integer(distance),
 								 p    = as.numeric(p),
-								 DUP = FALSE, NAOK = FALSE, PACKAGE = "Rclusterpp" )
+								 NAOK = FALSE, PACKAGE = "Rclusterpp" )
 		
 		hcl$labels = row.names(x)
 		hcl$method = METHODS[method]

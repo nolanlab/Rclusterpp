@@ -10,6 +10,7 @@ if( identical( .Platform$OS.type, "windows" ) && identical( .Platform$r_arch, "x
 		} else {
 			path <- system.file(package=pkg, "unit_tests")
 		}
+    setwd(path)
 		cat("\nRunning unit tests:\n")
 		print(list(pkg=pkg, getwd=getwd(), pathToUnitTests=path))
  

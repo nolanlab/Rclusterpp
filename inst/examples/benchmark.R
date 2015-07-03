@@ -11,8 +11,8 @@ for (r in ROWS) {
 	data <- matrix(rnorm(r * COLUMNS), nrow=r)
 	result <- benchmark( 
 		Rclusterpp = Rclusterpp.hclust(data, method="ward"),
-		hclust = stats::hclust((dist(data, method="euclidean")^2)/2.0, method="ward"),
-		fastcluster = fastcluster::hclust((dist(data, method="euclidean")^2)/2.0, method="ward"),
+		hclust = stats::hclust((dist(data, method="euclidean")^2)/2.0, method="ward.D"),
+		fastcluster = fastcluster::hclust((dist(data, method="euclidean")^2)/2.0, method="ward.D"),
 		replications = 5, 
 		columns=c("test", "elapsed", "user.self", "sys.self"),
 		order="elapsed"

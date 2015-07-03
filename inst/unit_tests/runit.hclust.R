@@ -18,7 +18,7 @@ compare.hclust <- function(h1, h2) {
 test.hclust.ward <- function()
 {
   d <- USArrests 
-	h <- hclust((dist(d, method="euclidean")^2)/2.0, method="ward")
+	h <- hclust((dist(d, method="euclidean")^2)/2.0, method="ward.D")
 	r <- Rclusterpp.hclust(d, method="ward")
 	compare.hclust(h, r)
 }
@@ -105,5 +105,22 @@ test.hclust.complete.euclidean <- function()
 	h <- hclust(dist(d, method="euclidean"), method="complete")
 	r <- Rclusterpp.hclust(d, method="complete", distance="euclidean")
 	compare.hclust(h, r)
+}
+
+valid.merge.ordering <- function(merge, i) {
+  idx <- which(merge[,i] > 0)
+  all(merge[idx,i] < idx)
+}
+
+test.hclust.ambiguous.clustering.merge.order <- function()
+{
+  load("ambiguous.Rdata")
+  r <- Rclusterpp.hclust(d, method="average", distance="euclidean")
+  checkTrue(valid.merge.ordering(r$merge, 1), msg="Invalid merge ordering")
+  checkTrue(valid.merge.ordering(r$merge, 2), msg="Invalid merge ordering")
+  
+  h <- stats::hclust(dist(d, method="euclidean"), method="average")
+  # Purposely ambiguous clustering order, so only heights will match
+  checkEquals(r$height, h$height, msg="Agglomeration heights are not equal")
 }
 
