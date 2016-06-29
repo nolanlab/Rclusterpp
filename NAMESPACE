@@ -6,3 +6,5 @@ export(
 	"Rclusterpp.distanceKinds",
 	"Rclusterpp.setThreads"
 )
+importFrom("utils", "packageDescription")
+import("Rcpp")
