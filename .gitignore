@@ -10,3 +10,4 @@ inst/unit_tests/report*
 autom4te.cache
 .Rproj.user
 .Rhistory
+..Rcheck
