@@ -1,5 +1,12 @@
 # Rclusterpp -- Large-scale hierarchical clustering in R
 
+[![Travis-CI Build
+Status](https://travis-ci.org/bnaras/Rclusterpp.svg?branch=master)](https://travis-ci.org/bnaras/Rclusterpp)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/Rclusterpp)](https://cran.r-project.org/package=Rclusterpp)
+[![Coverage
+Status](https://img.shields.io/codecov/c/github/bnaras/Rclusterpp/master.svg)](https://codecov.io/github/bnaras/Rclusterpp?branch=master)
+[![](https://cranlogs.r-pkg.org/badges/Rclusterpp)](https://CRAN.R-project.org/package=Rclusterpp)
+
 Rclusterpp provides flexible native hierarchical clustering routings optimized
 for performance and minimal memory requirements. In particular Rclusterpp
 includes "stored data" clustering implementations with *O(n)* memory
