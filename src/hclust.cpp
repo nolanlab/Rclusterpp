@@ -166,3 +166,18 @@ BEGIN_RCPP
 	return wrap(clusters);
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"linkage_kinds", (DL_FUNC) &linkage_kinds, 0},
+    {"distance_kinds", (DL_FUNC) &distance_kinds, 0},
+    {"rclusterpp_get_num_procs", (DL_FUNC) &rclusterpp_get_num_procs, 0},
+    {"rclusterpp_set_num_threads", (DL_FUNC) &rclusterpp_set_num_threads, 2},
+    {"hclust_from_data", (DL_FUNC) &hclust_from_data, 5},
+    {"hclust_from_distance", (DL_FUNC) &hclust_from_distance, 4},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_Rclusterpp(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

@@ -4,4 +4,4 @@
 ^\.git
 .Rhistory
 .git
-
+.travis.yml

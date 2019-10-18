@@ -1,0 +1,26 @@
+language: r
+
+r:
+  - release
+  - devel
+cache: packages
+
+r_packages:
+  - covr
+
+addons:
+  apt:
+    packages:
+      # Linux: only bash (and sh) are installed by default
+      - ksh
+      - zsh
+      # Linux: install the checkbashisms script
+      - devscripts
+
+after_success:
+  - Rscript -e 'library(covr); codecov()'
+
+sudo: false
+
+notifications:
+  email: false
