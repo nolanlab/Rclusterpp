@@ -1,18 +1,18 @@
 Package: Rclusterpp
 Type: Package
 Title: Linkable C++ Clustering
-Version: 0.2.4
-Date: 2016-05-29
+Version: 0.2.5
+VignetteBuilder: knitr
+Date: 2019-10-17
 Authors@R: c(person("Michael Linderman",role="aut",email="michael.d.linderman@gmail.com"),
 	     person("Robert Bruggner",role="cre",email="rbruggner@gmail.com"),
 	     person("Zach Bjornson",role="ctb",email="bjornson@stanford.edu"))
 Description: Provide flexible native clustering routines that can be
         linked against in downstream packages.
 License: MIT + file LICENSE
-LazyData: yes
 Depends: R (>= 2.12.0), Rcpp (>= 0.10.4)
 LinkingTo: Rcpp, RcppEigen
-Suggests: RUnit, rbenchmark, fastcluster, inline
+Suggests: RUnit, rbenchmark, fastcluster, inline, knitr
 URL: https://github.com/nolanlab/Rclusterpp
 BugReports: https://github.com/nolanlab/Rclusterpp/issues
 NeedsCompilation: yes
