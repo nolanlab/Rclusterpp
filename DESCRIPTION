@@ -5,8 +5,10 @@ Version: 0.2.5
 VignetteBuilder: knitr
 Date: 2019-10-17
 Authors@R: c(person("Michael Linderman",role="aut",email="michael.d.linderman@gmail.com"),
-	     person("Robert Bruggner",role="cre",email="rbruggner@gmail.com"),
-	     person("Zach Bjornson",role="ctb",email="bjornson@stanford.edu"))
+	     person("Robert Bruggner",role="ctb",email="rbruggner@gmail.com"),
+	     person("Zach Bjornson",role="ctb",email="bjornson@stanford.edu"),
+	     person("Robert Tibshirani",role="ctb",email="tibs@stanford.edu"),
+	     person("Balasubramanian Narasimhan",role="cre",email="naras@stanford.edu"))
 Description: Provide flexible native clustering routines that can be
         linked against in downstream packages.
 License: MIT + file LICENSE
