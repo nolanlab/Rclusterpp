@@ -22,13 +22,18 @@ if( identical( .Platform$OS.type, "windows" ) && identical( .Platform$r_arch, "x
 		# Run
 		tests <- runTestSuite(testSuite)
  
+		##
+		## Removing writing of test results to package dir
+		##
+		
 		# Default report name
-		pathReport <- file.path(path, "report")
+		#pathReport <- file.path(path, "report")
  
-		# Report to stdout and text files
+		# Report to stdout 
 		printTextProtocol(tests, showDetails=FALSE)
-		printTextProtocol(tests, showDetails=FALSE, fileName=paste(pathReport, "Summary.txt", sep=""))
-		printTextProtocol(tests, showDetails=TRUE, fileName=paste(pathReport, ".txt", sep=""))
+		# and to text files
+		#printTextProtocol(tests, showDetails=FALSE, fileName=paste(pathReport, "Summary.txt", sep=""))
+		#printTextProtocol(tests, showDetails=TRUE, fileName=paste(pathReport, ".txt", sep=""))
  
 		# Report to HTML file
 		#printHTMLProtocol(tests, fileName=paste(pathReport, ".html", sep=""))
