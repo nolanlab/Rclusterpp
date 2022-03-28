@@ -5,3 +5,4 @@
 .Rhistory
 .git
 .travis.yml
+^\.github$
