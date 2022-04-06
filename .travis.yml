@@ -16,6 +16,7 @@ addons:
       - zsh
       # Linux: install the checkbashisms script
       - devscripts
+      - qpdf
 
 after_success:
   - Rscript -e 'library(covr); codecov()'

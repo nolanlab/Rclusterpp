@@ -28,7 +28,7 @@ Rclusterpp.setThreads(threads = 1)
 	Integer number of threads
 }
 \references{
-\url{http://openmp.org/}
+\url{https://www.openmp.org/}
 }
 \author{
 Michael Linderman
