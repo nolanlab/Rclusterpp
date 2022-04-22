@@ -20,7 +20,8 @@ Rclusterpp.hclust <- function(x, method="ward", members=NULL, distance="euclidea
   if (method == -1) 
     stop("Ambiguous clustering method")
 
-	if (any(class(x)=="dist")) {
+
+	if (inherits(x, "dist")) {
 		dist.method = attributes(x)$method
 		labels      = attributes(x)$Labels
 
