@@ -3,6 +3,7 @@
 
 #include <RcppCommon.h>
 
+#define EIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS
 
 #define EIGEN_MATRIXBASE_PLUGIN <RclusterppEigenMatrixPlugin.h>
 #define EIGEN_ARRAYBASE_PLUGIN <RclusterppEigenArrayPlugin.h>

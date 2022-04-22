@@ -1,6 +1,8 @@
 #ifndef RCLUSTERP_METHOD_H
 #define RCLUSTERP_METHOD_H
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 namespace Rclusterpp {
 
 	
