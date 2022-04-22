@@ -1,6 +1,8 @@
 #ifndef RCLUSTERP_ALGORITHM_H
 #define RCLUSTERP_ALGORITHM_H
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include <limits>
 #include <utility>
 #include <algorithm>
