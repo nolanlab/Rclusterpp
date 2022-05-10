@@ -1,7 +1,7 @@
 Package: Rclusterpp
 Type: Package
 Title: Linkable C++ Clustering
-Version: 0.2.5.9995
+Version: 0.2.6
 VignetteBuilder: knitr
 Date: 2022-04-30
 Authors@R: c(person("Michael Linderman",role="aut",email="michael.d.linderman@gmail.com"),
