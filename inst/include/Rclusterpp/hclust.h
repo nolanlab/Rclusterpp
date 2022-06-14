@@ -52,9 +52,9 @@ namespace Rclusterpp {
 		typename Clusters::const_iterator last  = clusters.end();
 		typename Clusters::const_iterator first = last - hclust.agglomerations();
 
-		std::transform(first, last, hclust.merge.column(0).begin(), std::mem_fun(&cluster_type::parent1Id));
-		std::transform(first, last, hclust.merge.column(1).begin(), std::mem_fun(&cluster_type::parent2Id));
-		std::transform(first, last, hclust.height.begin(), std::mem_fun(&cluster_type::disimilarity));
+		std::transform(first, last, hclust.merge.column(0).begin(), std::mem_fn(&cluster_type::parent1Id));
+		std::transform(first, last, hclust.merge.column(1).begin(), std::mem_fn(&cluster_type::parent2Id));
+		std::transform(first, last, hclust.height.begin(), std::mem_fn(&cluster_type::disimilarity));
 
 		// Swap merge entries if needed to match 'stock' hclust output
 		for (int i=0; i<hclust.merge.rows(); i++) {

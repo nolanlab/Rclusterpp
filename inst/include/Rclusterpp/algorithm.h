@@ -1,8 +1,6 @@
 #ifndef RCLUSTERP_ALGORITHM_H
 #define RCLUSTERP_ALGORITHM_H
 
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 #include <limits>
 #include <utility>
 #include <algorithm>
@@ -138,9 +136,9 @@ namespace Rclusterpp {
     // Note, sort requires strict weak ordering and will fail in a data dependent way
     // if the comparison function does not satisfy that requirement
     
-		typename clusters_type::iterator part = std::stable_partition(clusters.begin(), clusters.end(), std::mem_fun(&cluster_type::initial));
+		typename clusters_type::iterator part = std::stable_partition(clusters.begin(), clusters.end(), std::mem_fn(&cluster_type::initial));
     std::sort(clusters.begin(), part, &compare_id<cluster_type>); 
-		std::stable_sort(part, clusters.end(), std::ptr_fun(&compare_disimilarity<cluster_type>)); 
+		std::stable_sort(part, clusters.end(), &compare_disimilarity<cluster_type>); 
 
 		for (size_t i=initial_clusters; i<result_clusters; i++) {
 			clusters[i]->set_id(i - initial_clusters + 1);  // Use R hclust 1-indexed convention for Id's
