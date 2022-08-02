@@ -1,8 +1,6 @@
 #ifndef RCLUSTERP_METHOD_H
 #define RCLUSTERP_METHOD_H
 
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 namespace Rclusterpp {
 
 	
@@ -267,25 +265,25 @@ namespace Rclusterpp {
 
 	template<class Matrix>
 	Methods::DistanceFromStoredDataRows<
-		Matrix, std::pointer_to_binary_function<typename CONST_ROW&, typename CONST_ROW&, typename Matrix::RealScalar> 
+		Matrix, typename std::function<typename Matrix::RealScalar(typename CONST_ROW&, typename CONST_ROW&)> 
 	> 
 	stored_data_rows(const Matrix& m, DistanceKinds dk, double minkowski=1.0) {
 		typedef Methods::DistanceFromStoredDataRows<
-			Matrix, std::pointer_to_binary_function<typename CONST_ROW&, typename CONST_ROW&, typename Matrix::RealScalar> 
+			Matrix, typename std::function<typename Matrix::RealScalar(typename CONST_ROW&, typename CONST_ROW&)> 
 		> distancer_type;
 
 		switch (dk) {
 			default: 
         throw std::invalid_argument("Linkage or distance method not yet supported");
 			case Rclusterpp::EUCLIDEAN:
-				return distancer_type(m, std::ptr_fun(&Methods::euclidean_distance<typename CONST_ROW>));
+				return distancer_type(m, Methods::euclidean_distance<typename CONST_ROW>);
 			case Rclusterpp::MANHATTAN:
-				return distancer_type(m, std::ptr_fun(&Methods::manhattan_distance<typename CONST_ROW>));
+				return distancer_type(m, Methods::manhattan_distance<typename CONST_ROW>);
 			case Rclusterpp::MAXIMUM:
-				return distancer_type(m, std::ptr_fun(&Methods::maximum_distance<typename CONST_ROW>));
+				return distancer_type(m, Methods::maximum_distance<typename CONST_ROW>);
 			case Rclusterpp::MINKOWSKI:
 				Methods::minkowski_power_g = minkowski;
-				return distancer_type(m, std::ptr_fun(&Methods::minkowski_distance<typename CONST_ROW>));
+				return distancer_type(m, Methods::minkowski_distance<typename CONST_ROW>);
 
 		}
 	}
