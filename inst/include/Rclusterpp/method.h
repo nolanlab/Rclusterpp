@@ -61,9 +61,9 @@ namespace Rclusterpp {
 		// Distance Adaptors
 		
 		template<class Matrix, class Distance>
-		class DistanceFromStoredDataRows : public std::binary_function<size_t, size_t, typename Distance::result_type> {
+		class DistanceFromStoredDataRows {
 			public:
-				typedef typename DistanceFromStoredDataRows::result_type result_type;
+				typedef typename Distance::result_type result_type;
 
 				DistanceFromStoredDataRows(const Matrix& data, Distance distance) : data_(data), distance_(distance) {}	
 
