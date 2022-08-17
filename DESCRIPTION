@@ -3,7 +3,7 @@ Type: Package
 Title: Linkable C++ Clustering
 Version: 0.2.6
 VignetteBuilder: knitr
-Date: 2022-04-30
+Date: 2022-08-02
 Authors@R: c(person("Michael Linderman",role="aut",email="michael.d.linderman@gmail.com"),
 	     person("Robert Bruggner",role="ctb",email="rbruggner@gmail.com"),
 	     person("Zach Bjornson",role="ctb",email="bjornson@stanford.edu"),
@@ -27,3 +27,4 @@ URL: https://github.com/nolanlab/Rclusterpp
 BugReports: https://github.com/nolanlab/Rclusterpp/issues
 NeedsCompilation: yes
 Encoding: UTF-8
+RoxygenNote: 7.2.1
