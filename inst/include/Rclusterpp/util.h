@@ -6,8 +6,10 @@ namespace Rclusterpp {
 	namespace Util {
 			
 		template<class OP>
-		class ClusterBinder : public std::binary_function<typename OP::second_argument_type*, typename OP::third_argument_type, typename OP::result_type> {
+		class ClusterBinder {
 		public:
+			typedef  typename OP::result_type result_type;
+
 			ClusterBinder(OP& o, typename OP::first_argument_type const* a1) : op(o), arg(a1) {}
 			typename OP::result_type operator()(const typename OP::second_argument_type* x, const typename OP::third_argument_type& d) {
 				return op(*arg, *x, d);

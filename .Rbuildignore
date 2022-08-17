@@ -6,3 +6,4 @@
 .git
 .travis.yml
 ^\.github$
+^\.vscode$
