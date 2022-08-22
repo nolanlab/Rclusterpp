@@ -1,4 +1,4 @@
-# Adapted from Rclusterpp.package.skeleton.R in Rclusterpp package
+# Adapted from RcppEigen.package.skeleton.R in the RcppEigen package
 
 Rclusterpp.package.skeleton <- function(
 	name = "anRpackage", list = character(), environment = .GlobalEnv,

@@ -10,6 +10,7 @@ if( identical( .Platform$OS.type, "windows" ) && identical( .Platform$r_arch, "x
 		} else {
 			path <- system.file(package=pkg, "unit_tests")
 		}
+	oldwd <- getwd()
     setwd(path)
 		cat("\nRunning unit tests:\n")
 		print(list(pkg=pkg, getwd=getwd(), pathToUnitTests=path))
@@ -37,7 +38,7 @@ if( identical( .Platform$OS.type, "windows" ) && identical( .Platform$r_arch, "x
  
 		# Report to HTML file
 		#printHTMLProtocol(tests, fileName=paste(pathReport, ".html", sep=""))
- 
+	setwd(oldwd)
 		# Return stop() to cause R CMD check stop in case of
 		#  - failures i.e. FALSE to unit tests or
 		#  - errors i.e. R errors
